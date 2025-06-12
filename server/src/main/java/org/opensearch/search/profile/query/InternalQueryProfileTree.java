@@ -37,9 +37,7 @@ import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,20 +47,20 @@ import java.util.Map;
  */
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
-    private final Map<Class<? extends Query>, List<Metric>> pluginMetrics;
+    private final Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics;
 
-    public InternalQueryProfileTree(Map<Class<? extends Query>, List<Metric>> pluginMetrics) {
+    public InternalQueryProfileTree(Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
         this.pluginMetrics = pluginMetrics;
     }
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        List<Metric> metrics = new ArrayList<>();
+        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
         for(QueryTimingType type : QueryTimingType.values()) {
-            metrics.add(new Timer(type.toString()));
+            metrics.put(type.toString(), Timer.class);
         }
         if (pluginMetrics.containsKey(query.getClass())) {
-            metrics.addAll(pluginMetrics.get(query.getClass()));
+            metrics.putAll(pluginMetrics.get(query.getClass()));
         }
         return new QueryProfileBreakdown(metrics);
     }

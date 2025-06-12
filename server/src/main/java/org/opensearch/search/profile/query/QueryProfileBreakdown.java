@@ -25,8 +25,8 @@ import java.util.function.BiFunction;
  */
 public class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
-    public QueryProfileBreakdown(List<Metric> pluginMetrics) {
-        super(pluginMetrics); // TODO: add query timers somewhere
+    public QueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
+        super(metrics);
     }
 
     @Override

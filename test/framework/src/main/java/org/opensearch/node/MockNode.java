@@ -174,7 +174,7 @@ public class MockNode extends Node {
         Executor indexSearcherExecutor,
         TaskResourceTrackingService taskResourceTrackingService,
         Collection<ConcurrentSearchRequestDecider.Factory> concurrentSearchDeciderFactories,
-        List<SearchPlugin.ProfileBreakdownProvider> pluginProfilers
+        List<SearchPlugin.PluginMetricsProvider> pluginProfilers
     ) {
         if (getPluginsService().filterPlugins(MockSearchService.TestPlugin.class).isEmpty()) {
             return super.newSearchService(

@@ -420,7 +420,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     private final Executor indexSearcherExecutor;
     private final TaskResourceTrackingService taskResourceTrackingService;
 
-    private final List<SearchPlugin.ProfileBreakdownProvider> pluginProfilers;
+    private final List<SearchPlugin.PluginMetricsProvider> pluginProfilers;
 
     public SearchService(
         ClusterService clusterService,
@@ -435,7 +435,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         Executor indexSearcherExecutor,
         TaskResourceTrackingService taskResourceTrackingService,
         Collection<ConcurrentSearchRequestDecider.Factory> concurrentSearchDeciderFactories,
-        List<SearchPlugin.ProfileBreakdownProvider> pluginProfilers
+        List<SearchPlugin.PluginMetricsProvider> pluginProfilers
     ) {
         Settings settings = clusterService.getSettings();
         this.threadPool = threadPool;
@@ -1564,10 +1564,10 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         }
         context.evaluateRequestShouldUseConcurrentSearch();
         if (source.profile()) {
-            Map<Class<? extends Query>, List<Metric>> pluginMetrics = new HashMap<>();
-            for(SearchPlugin.ProfileBreakdownProvider p : pluginProfilers) {
-                Map<Class<? extends Query>, List<Metric>> profile = p.getPluginMetrics();
-                pluginMetrics.putAll(profile);
+            Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics = new HashMap<>();
+            for(SearchPlugin.PluginMetricsProvider p : pluginProfilers) {
+                Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> metrics = p.getPluginMetrics();
+                pluginMetrics.putAll(metrics);
             }
             Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch(), pluginMetrics);
             context.setProfilers(profilers);

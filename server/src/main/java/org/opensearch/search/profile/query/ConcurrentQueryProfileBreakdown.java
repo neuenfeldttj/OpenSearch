@@ -14,13 +14,10 @@ import org.opensearch.OpenSearchException;
 import org.opensearch.core.ParseField;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.Timer;
+import org.opensearch.search.sort.BucketedSort;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -50,14 +47,15 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
     // represents slice to leaves mapping as for each slice a unique collector instance is created
     private final Map<Collector, List<LeafReaderContext>> sliceCollectorsToLeaves = new ConcurrentHashMap<>();
 
-    private Set<String> timingMetrics;
-    private Set<String> nonTimingMetrics;
+    private final Map<String, Class<? extends Metric>> metrics;
+    private final Set<String> timingMetrics;
+    private final Set<String> nonTimingMetrics;
 
-    private final List<Metric> metrics;
-
-    public ConcurrentQueryProfileBreakdown(List<Metric> metrics) {
+    public ConcurrentQueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
         super(metrics);
         this.metrics = metrics;
+        this.timingMetrics = getTimingMetrics();
+        this.nonTimingMetrics = getNonTimingMetrics();
     }
 
     @Override
@@ -176,9 +174,6 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
             // max slice end time across all timing types
             long sliceMaxEndTime = Long.MIN_VALUE;
             long sliceMinStartTime = Long.MAX_VALUE;
-
-            timingMetrics = getTimingMetrics(slice.getValue().getFirst());
-            nonTimingMetrics = getNonTimingMetrics(slice.getValue().getFirst());
 
             for (String timingType : timingMetrics) {
                 if (timingType.equals(QueryTimingType.CREATE_WEIGHT.toString())) {
@@ -434,20 +429,24 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
         );
     }
 
-    private Set<String> getTimingMetrics(LeafReaderContext context) {
-        if (!contexts.containsKey(context)) {
-            return Set.of();
+    private Set<String> getTimingMetrics() {
+        Set<String> timingMetrics = new HashSet<>();
+        for(Map.Entry<String, Class<? extends Metric>> entry : metrics.entrySet()) {
+            if(entry.getValue().equals(Timer.class)) {
+               timingMetrics.add(entry.getKey());
+            }
         }
-        final Map<String, Long> map = contexts.get(context).toBreakdownMap();
-        return map.keySet().stream().filter(key -> key.endsWith(TIMING_TYPE_COUNT_SUFFIX)).map(key -> key.replace(TIMING_TYPE_COUNT_SUFFIX, "")).collect(Collectors.toSet());
+       return timingMetrics;
     }
 
-    private Set<String> getNonTimingMetrics(LeafReaderContext context) {
-        if (!contexts.containsKey(context)) {
-            return Set.of();
+    private Set<String> getNonTimingMetrics() {
+        Set<String> nonTimingMetrics = new HashSet<>();
+        for(Map.Entry<String, Class<? extends Metric>> entry : metrics.entrySet()) {
+            if(!entry.getValue().equals(Timer.class)) {
+                nonTimingMetrics.add(entry.getKey());
+            }
         }
-        final Map<String, Long> map = contexts.get(context).toBreakdownMap();
-        return map.keySet().stream().filter(key -> !key.endsWith(TIMING_TYPE_TIME_SUFFIX) && !key.endsWith(TIMING_TYPE_COUNT_SUFFIX) && !key.endsWith(TIMING_TYPE_START_TIME_SUFFIX)).collect(Collectors.toSet());
+        return nonTimingMetrics;
     }
 
     @Override

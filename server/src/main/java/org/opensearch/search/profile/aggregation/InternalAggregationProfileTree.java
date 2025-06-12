@@ -51,9 +51,9 @@ public class InternalAggregationProfileTree extends AbstractInternalProfileTree<
 
     @Override
     protected AggregationProfileBreakdown createProfileBreakdown(Aggregator aggregator) {
-        List<Metric> metrics = new ArrayList<>();
+        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
         for(AggregationTimingType type : AggregationTimingType.values()) {
-            metrics.add(new Timer(type.toString()));
+            metrics.put(type.toString(), Timer.class);
         }
         return new AggregationProfileBreakdown(metrics);
     }

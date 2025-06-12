@@ -104,7 +104,7 @@ public interface SearchPlugin {
     /**
      * The plugin provider to be used to get the profilers from plugins.
      */
-    default ProfileBreakdownProvider getProfileBreakdownProvider() {
+    default PluginMetricsProvider getPluginMetricsProvider() {
         return null;
     }
 
@@ -242,12 +242,12 @@ public interface SearchPlugin {
     /**
      * Plugin Profiler provider
      */
-    interface ProfileBreakdownProvider {
+    interface PluginMetricsProvider {
         /**
          * Provides a profiler instance
          * @return profiler instance
          */
-        Map<Class<? extends Query>,List<Metric>> getPluginMetrics();
+        Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> getPluginMetrics();
     }
 
     /**

@@ -322,7 +322,7 @@ public class SearchModule {
 
     private final Collection<ConcurrentSearchRequestDecider.Factory> concurrentSearchDeciderFactories;
 
-    private final List<SearchPlugin.ProfileBreakdownProvider> pluginProfilerProviders;
+    private final List<SearchPlugin.PluginMetricsProvider> pluginProfilerProviders;
 
     /**
      * Constructs a new SearchModule object
@@ -1301,12 +1301,12 @@ public class SearchModule {
         return provider;
     }
 
-    private List<SearchPlugin.ProfileBreakdownProvider> registerProfilerProviders(List<SearchPlugin> plugins) {
+    private List<SearchPlugin.PluginMetricsProvider> registerProfilerProviders(List<SearchPlugin> plugins) {
 
-        List<SearchPlugin.ProfileBreakdownProvider> profilerProviders = new ArrayList<>();
+        List<SearchPlugin.PluginMetricsProvider> profilerProviders = new ArrayList<>();
 
         for (SearchPlugin plugin : plugins) {
-            SearchPlugin.ProfileBreakdownProvider profilerProvider = plugin.getProfileBreakdownProvider();
+            SearchPlugin.PluginMetricsProvider profilerProvider = plugin.getPluginMetricsProvider();
             if(profilerProvider != null) {
                 profilerProviders.add(profilerProvider);
             }
@@ -1327,7 +1327,7 @@ public class SearchModule {
         return (indexSearcherExecutorProvider != null) ? indexSearcherExecutorProvider.getExecutor(pool) : null;
     }
 
-    public List<SearchPlugin.ProfileBreakdownProvider> getPluginProfileBreakdownProviders() {
+    public List<SearchPlugin.PluginMetricsProvider> getPluginPluginMetricsProviders() {
         return Collections.unmodifiableList(pluginProfilerProviders);
     }
 }

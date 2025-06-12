@@ -24,16 +24,13 @@ import java.util.Map;
 @PublicApi(since="3.0.0")
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
-    private final List<Metric> metrics;
-
     /**
      * Sole constructor.
      *
      * @param metrics
      */
-    public AbstractQueryProfileBreakdown(List<Metric> metrics) {
+    public AbstractQueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
         super(metrics);
-        this.metrics = metrics;
     }
 
     public abstract AbstractQueryProfileBreakdown context(Object context);

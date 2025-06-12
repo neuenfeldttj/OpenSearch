@@ -35,9 +35,9 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
     // one thread will access the LinkedList at a time.
     private final Map<Long, LinkedList<Timer>> threadToRewriteTimers;
 
-    private final Map<Class<? extends Query>,  List<Metric>> pluginMetrics;
+    private final Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  List<Metric>> pluginMetrics) {
+    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics) {
         super(profileTree);
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
