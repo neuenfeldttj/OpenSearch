@@ -57,7 +57,6 @@ import java.util.Map;
 public class Timer extends Metric {
     public static final String TIMING_TYPE_COUNT_SUFFIX = "_count";
     public static final String TIMING_TYPE_START_TIME_SUFFIX = "_start_time";
-    public static final String TIMING_TYPE_TIME_SUFFIX = "_time";
 
     private boolean doTiming;
     private long timing, count, lastCount, start, earliestTimerStartTime;
@@ -145,7 +144,7 @@ public class Timer extends Metric {
     @Override
     public Map<String, Long> toBreakdownMap() {
         Map<String, Long> map = new HashMap<>();
-        map.put(super.getName() + TIMING_TYPE_TIME_SUFFIX, getApproximateTiming());
+        map.put(super.getName(), getApproximateTiming());
         map.put(super.getName() + TIMING_TYPE_COUNT_SUFFIX, getCount());
         map.put(super.getName() + TIMING_TYPE_START_TIME_SUFFIX, getEarliestTimerStartTime());
         return map;

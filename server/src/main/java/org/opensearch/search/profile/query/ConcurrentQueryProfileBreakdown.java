@@ -86,7 +86,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
         final long createWeightStartTime = topLevelBreakdownMapWithWeightTime.get(
                 QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_START_TIME_SUFFIX
         );
-        final long createWeightTime = topLevelBreakdownMapWithWeightTime.get(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_TIME_SUFFIX);
+        final long createWeightTime = topLevelBreakdownMapWithWeightTime.get(QueryTimingType.CREATE_WEIGHT.toString());
 
         if (contexts.isEmpty()) {
             // If there are no leaf contexts, then return the default concurrent query level breakdown, which will include the
@@ -111,7 +111,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
             minSliceNodeTime = 0L;
             avgSliceNodeTime = 0L;
             Map<String, Long> queryBreakdownMap = new HashMap<>(breakdown.toBreakdownMap());
-            queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_TIME_SUFFIX, createWeightTime);
+            queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT.toString(), createWeightTime);
             queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_COUNT_SUFFIX, 1L);
             return queryBreakdownMap;
         }
@@ -130,7 +130,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
     private Map<String, Long> buildDefaultQueryBreakdownMap(long createWeightTime) {
         final Map<String, Long> concurrentQueryBreakdownMap = new HashMap<>();
         for (QueryTimingType timingType : QueryTimingType.values()) {
-            final String timingTypeKey = timingType + TIMING_TYPE_TIME_SUFFIX;
+            final String timingTypeKey = timingType.toString();
             final String timingTypeCountKey = timingType + TIMING_TYPE_COUNT_SUFFIX;
 
             if (timingType.equals(QueryTimingType.CREATE_WEIGHT)) {
@@ -183,7 +183,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
 
                 // for each timing type compute maxSliceEndTime and minSliceStartTime. Also add the counts of timing type to
                 // compute total count at slice level
-                final String timingTypeTimeKey = timingType + TIMING_TYPE_TIME_SUFFIX;
+                final String timingTypeTimeKey = timingType;
                 final String timingTypeCountKey = timingType + TIMING_TYPE_COUNT_SUFFIX;
                 final String timingTypeStartKey = timingType + TIMING_TYPE_START_TIME_SUFFIX;
                 final String timingTypeSliceStartTimeKey = timingType + SLICE_START_TIME_SUFFIX;
@@ -324,7 +324,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
 
         // the create weight time is computed at the query level and is called only once per query
         queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_COUNT_SUFFIX, 1L);
-        queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_TIME_SUFFIX, createWeightTime);
+        queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT.toString(), createWeightTime);
 
         for(String metric : timingMetrics) {
 
@@ -333,7 +333,7 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
                 continue;
             }
 
-            final String timingTypeTimeKey = metric + TIMING_TYPE_TIME_SUFFIX;
+            final String timingTypeTimeKey = metric;
             final String timingTypeCountKey = metric + TIMING_TYPE_COUNT_SUFFIX;
             final String sliceEndTimeForTimingType = metric + SLICE_END_TIME_SUFFIX;
             final String sliceStartTimeForTimingType = metric + SLICE_START_TIME_SUFFIX;
