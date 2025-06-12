@@ -64,14 +64,7 @@ import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.discovery.Discovery;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 import static org.opensearch.cluster.coordination.Coordinator.ZEN1_BWC_TERM;

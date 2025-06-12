@@ -9,10 +9,12 @@
 package org.opensearch.search.profile.aggregation;
 
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Timer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.unmodifiableMap;
@@ -21,13 +23,11 @@ import static java.util.Collections.unmodifiableMap;
  * A profile breakdown for aggregations.
  */
 @PublicApi(since = "3.0.0")
-public class AggregationTimingProfileBreakdown extends AbstractTimingProfileBreakdown {
+public class AggregationProfileBreakdown extends AbstractProfileBreakdown {
     private final Map<String, Object> extra = new HashMap<>();
 
-    public AggregationTimingProfileBreakdown() {
-        for(AggregationTimingType type : AggregationTimingType.values()) {
-            timers.put(type.toString(), new Timer());
-        }
+    public AggregationProfileBreakdown(List<Metric> timers) {
+        super(timers);
     }
 
     @Override

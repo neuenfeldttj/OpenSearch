@@ -35,7 +35,7 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TwoPhaseIterator;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Timer;
 
 import java.io.IOException;
@@ -54,15 +54,15 @@ final class ProfileScorer extends Scorer {
     private final Timer scoreTimer, nextDocTimer, advanceTimer, matchTimer, shallowAdvanceTimer, computeMaxScoreTimer,
         setMinCompetitiveScoreTimer;
 
-    ProfileScorer(Scorer scorer, AbstractTimingProfileBreakdown profile) {
+    ProfileScorer(Scorer scorer, AbstractProfileBreakdown profile) {
         this.scorer = scorer;
-        scoreTimer = profile.getTimer(QueryTimingType.SCORE.toString());
-        nextDocTimer = profile.getTimer(QueryTimingType.NEXT_DOC.toString());
-        advanceTimer = profile.getTimer(QueryTimingType.ADVANCE.toString());
-        matchTimer = profile.getTimer(QueryTimingType.MATCH.toString());
-        shallowAdvanceTimer = profile.getTimer(QueryTimingType.SHALLOW_ADVANCE.toString());
-        computeMaxScoreTimer = profile.getTimer(QueryTimingType.COMPUTE_MAX_SCORE.toString());
-        setMinCompetitiveScoreTimer = profile.getTimer(QueryTimingType.SET_MIN_COMPETITIVE_SCORE.toString());
+        scoreTimer = (Timer) profile.getMetric(QueryTimingType.SCORE.toString());
+        nextDocTimer = (Timer) profile.getMetric(QueryTimingType.NEXT_DOC.toString());
+        advanceTimer = (Timer) profile.getMetric(QueryTimingType.ADVANCE.toString());
+        matchTimer = (Timer) profile.getMetric(QueryTimingType.MATCH.toString());
+        shallowAdvanceTimer = (Timer) profile.getMetric(QueryTimingType.SHALLOW_ADVANCE.toString());
+        computeMaxScoreTimer = (Timer) profile.getMetric(QueryTimingType.COMPUTE_MAX_SCORE.toString());
+        setMinCompetitiveScoreTimer = (Timer) profile.getMetric(QueryTimingType.SET_MIN_COMPETITIVE_SCORE.toString());
     }
 
     @Override

@@ -11,20 +11,32 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.Timer;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * A {@link AbstractTimingProfileBreakdown} for query timings with contexts.
+ * A {@link AbstractProfileBreakdown} for query timings with contexts.
  */
 @PublicApi(since="3.0.0")
-public abstract class AbstractQueryTimingProfileBreakdown extends AbstractTimingProfileBreakdown {
+public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
-    public abstract AbstractQueryTimingProfileBreakdown context(Object context);
+    private final List<Metric> metrics;
 
-    public abstract AbstractTimingProfileBreakdown getPluginBreakdown(Object context);
+    /**
+     * Sole constructor.
+     *
+     * @param metrics
+     */
+    public AbstractQueryProfileBreakdown(List<Metric> metrics) {
+        super(metrics);
+        this.metrics = metrics;
+    }
+
+    public abstract AbstractQueryProfileBreakdown context(Object context);
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}
 

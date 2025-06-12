@@ -36,6 +36,7 @@ import org.opensearch.common.annotation.PublicApi;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -51,8 +52,23 @@ import static java.util.Collections.emptyMap;
 @PublicApi(since="3.0.0")
 public abstract class AbstractProfileBreakdown {
 
+    public static final String NODE_TIME_RAW = "time_in_nanos";
+
+    private final List<Metric> metrics;
+
     /** Sole constructor. */
-    public AbstractProfileBreakdown() {}
+    public AbstractProfileBreakdown(List<Metric> metrics) {
+        this.metrics = metrics;
+    }
+
+    public Metric getMetric(String name) {
+        for(Metric metric : metrics) {
+            if(metric.getName().equals(name)) {
+                return metric;
+            }
+        }
+        return null;
+    }
 
     /**
      * Gather important metrics for current instance
@@ -62,7 +78,24 @@ public abstract class AbstractProfileBreakdown {
     /**
      * Build a breakdown for current instance
      */
-    abstract public Map<String, Long> toBreakdownMap();
+    public Map<String, Long> toBreakdownMap() {
+        Map<String, Long> map = new HashMap<>();
+        for(Metric metric : metrics) {
+            map.putAll(metric.toBreakdownMap());
+        }
+        return map;
+    }
+
+    public long toNodeTime() {
+        long total = 0;
+        for(Metric metric : metrics) {
+            if(metric instanceof Timer) {
+                total += ((Timer) metric).getApproximateTiming();
+            }
+        }
+        return total;
+    }
+
 
     /**
      * Fetch extra debugging information.
@@ -77,15 +110,5 @@ public abstract class AbstractProfileBreakdown {
      */
     public BiFunction<String, Long, Long> handleConcurrentPluginMetric() {
         throw new IllegalCallerException("must be overridden by plugin");
-    }
-
-    public Map<String, Long> filterZeros(Map<String, Long> map) {
-        Map<String, Long> filteredMap = new HashMap<>(map.size());
-        for (Map.Entry<String, Long> entry : map.entrySet()) {
-            if (entry.getValue() != 0) {
-                filteredMap.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return Collections.unmodifiableMap(filteredMap);
     }
 }

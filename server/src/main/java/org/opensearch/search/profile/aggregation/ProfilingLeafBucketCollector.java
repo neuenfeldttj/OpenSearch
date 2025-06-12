@@ -48,9 +48,9 @@ public class ProfilingLeafBucketCollector extends LeafBucketCollector {
     private LeafBucketCollector delegate;
     private Timer collectTimer;
 
-    public ProfilingLeafBucketCollector(LeafBucketCollector delegate, AggregationTimingProfileBreakdown profileBreakdown) {
+    public ProfilingLeafBucketCollector(LeafBucketCollector delegate, AggregationProfileBreakdown profileBreakdown) {
         this.delegate = delegate;
-        this.collectTimer = profileBreakdown.getTimer(AggregationTimingType.COLLECT.toString());
+        this.collectTimer = (Timer) profileBreakdown.getMetric(AggregationTimingType.COLLECT.toString());
     }
 
     @Override

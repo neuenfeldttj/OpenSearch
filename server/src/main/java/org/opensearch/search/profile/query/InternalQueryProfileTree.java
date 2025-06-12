@@ -33,9 +33,13 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
+import org.opensearch.search.profile.Timer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,17 +49,21 @@ import java.util.Map;
  */
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
-    private final Map<Class<? extends Query>,  Class<? extends AbstractTimingProfileBreakdown>> pluginBreakdownClasses;
+    private final Map<Class<? extends Query>, List<Metric>> pluginMetrics;
 
-    public InternalQueryProfileTree(Map<Class<? extends Query>, Class<? extends AbstractTimingProfileBreakdown>> breakdowns) {
-        this.pluginBreakdownClasses = breakdowns;
+    public InternalQueryProfileTree(Map<Class<? extends Query>, List<Metric>> pluginMetrics) {
+        this.pluginMetrics = pluginMetrics;
     }
 
     @Override
-    protected AbstractQueryTimingProfileBreakdown createProfileBreakdown(Query query) {
-        if(pluginBreakdownClasses != null && pluginBreakdownClasses.get(query.getClass()) != null) {
-            return new QueryTimingProfileBreakdown(pluginBreakdownClasses.get(query.getClass()));
+    protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
+        List<Metric> metrics = new ArrayList<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metrics.add(new Timer(type.toString()));
         }
-        return new QueryTimingProfileBreakdown(null);
+        if (pluginMetrics.containsKey(query.getClass())) {
+            metrics.addAll(pluginMetrics.get(query.getClass()));
+        }
+        return new QueryProfileBreakdown(metrics);
     }
 }

@@ -25,7 +25,7 @@ import org.apache.lucene.index.NoMergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.store.Directory;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Timer;
 import org.opensearch.test.OpenSearchTestCase;
 import org.junit.Before;
@@ -33,20 +33,20 @@ import org.junit.Before;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.opensearch.search.profile.AbstractTimingProfileBreakdown.*;
-import static org.opensearch.search.profile.query.ConcurrentQueryTimingProfileBreakdown.MIN_PREFIX;
-import static org.opensearch.search.profile.query.ConcurrentQueryTimingProfileBreakdown.SLICE_END_TIME_SUFFIX;
-import static org.opensearch.search.profile.query.ConcurrentQueryTimingProfileBreakdown.SLICE_START_TIME_SUFFIX;
+import static org.opensearch.search.profile.Timer.*;
+import static org.opensearch.search.profile.query.ConcurrentQueryProfileBreakdown.MIN_PREFIX;
+import static org.opensearch.search.profile.query.ConcurrentQueryProfileBreakdown.SLICE_END_TIME_SUFFIX;
+import static org.opensearch.search.profile.query.ConcurrentQueryProfileBreakdown.SLICE_START_TIME_SUFFIX;
 import static org.mockito.Mockito.mock;
 
-public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCase {
-    private ConcurrentQueryTimingProfileBreakdown testQueryProfileBreakdown;
+public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
+    private ConcurrentQueryProfileBreakdown testQueryProfileBreakdown;
     private Timer createWeightTimer;
 
     @Before
     public void setup() {
-        testQueryProfileBreakdown = new ConcurrentQueryTimingProfileBreakdown(null);
-        createWeightTimer = testQueryProfileBreakdown.getTimer(QueryTimingType.CREATE_WEIGHT.toString());
+        testQueryProfileBreakdown = new ConcurrentQueryProfileBreakdown(null);
+        createWeightTimer = (Timer) testQueryProfileBreakdown.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
         try {
             createWeightTimer.start();
             Thread.sleep(10);
@@ -71,12 +71,12 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
                 assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
                 // verify there is no min/max/avg for weight type stats
                 assertFalse(
-                    queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey)
+                    queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeCountKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
                 );
                 // verify total/min/max/avg node time is same as weight time
                 assertEquals(createWeightTime, testQueryProfileBreakdown.toNodeTime());
@@ -86,13 +86,13 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
                 continue;
             }
             assertEquals(0, (long) queryBreakDownMap.get(timingTypeKey+TIMING_TYPE_TIME_SUFFIX));
-            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey));
-            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey));
+            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey));
+            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey));
             assertEquals(0, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeKey));
             assertEquals(0, (long) queryBreakDownMap.get(timingTypeCountKey));
-            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
+            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
             assertEquals(0, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeCountKey));
-            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
+            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
         }
     }
 
@@ -104,7 +104,7 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         final long createWeightEarliestStartTime = createWeightTimer.getEarliestTimerStartTime();
         final long createWeightEndTime = createWeightEarliestStartTime + createWeightTimer.getApproximateTiming();
         final Map<String, Long> leafProfileBreakdownMap = getLeafBreakdownMap(createWeightEndTime + 10, 10, 1);
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap
         );
         testQueryProfileBreakdown.associateCollectorToLeaves(sliceCollector, sliceLeaf);
@@ -154,10 +154,10 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         final long createWeightEndTime = createWeightEarliestStartTime + createWeightTimer.getApproximateTiming();
         final Map<String, Long> leafProfileBreakdownMap_1 = getLeafBreakdownMap(createWeightEndTime + 10, 10, 1);
         final Map<String, Long> leafProfileBreakdownMap_2 = getLeafBreakdownMap(createWeightEndTime + 40, 10, 1);
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_1
         );
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_2 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_2 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_2
         );
         testQueryProfileBreakdown.associateCollectorToLeaves(sliceCollector_1, directoryReader.leaves().get(0));
@@ -218,10 +218,10 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         final long createWeightEndTime = createWeightEarliestStartTime + createWeightTimer.getApproximateTiming();
         final Map<String, Long> leafProfileBreakdownMap_1 = getLeafBreakdownMap(createWeightEndTime + 10, 10, 1);
         final Map<String, Long> leafProfileBreakdownMap_2 = getLeafBreakdownMap(createWeightEndTime + 40, 20, 1);
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_1
         );
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_2 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_2 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_2
         );
         testQueryProfileBreakdown.associateCollectorToLeaves(sliceCollector_1, directoryReader.leaves().get(0));
@@ -243,23 +243,23 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
                 assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
                 // verify there is no min/max/avg for weight type stats
                 assertFalse(
-                    queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey)
+                    queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeCountKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
                 );
                 continue;
             }
             assertEquals(50, (long) queryBreakDownMap.get(timingTypeKey + TIMING_TYPE_TIME_SUFFIX));
-            assertEquals(20, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey));
-            assertEquals(15, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey));
+            assertEquals(20, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey));
+            assertEquals(15, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey));
             assertEquals(10, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeKey));
             assertEquals(2, (long) queryBreakDownMap.get(timingTypeCountKey));
-            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
+            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
             assertEquals(1, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeCountKey));
-            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
+            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
         }
 
         assertEquals(20, testQueryProfileBreakdown.getMaxSliceNodeTime());
@@ -277,7 +277,7 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         final long createWeightEarliestStartTime = createWeightTimer.getEarliestTimerStartTime();
         final long createWeightEndTime = createWeightEarliestStartTime + createWeightTimer.getApproximateTiming();
         final Map<String, Long> leafProfileBreakdownMap_1 = getLeafBreakdownMap(createWeightEndTime + 10, 10, 1);
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_1
         );
         testQueryProfileBreakdown.associateCollectorToLeaves(sliceCollector_1, directoryReader.leaves().get(0));
@@ -299,24 +299,24 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
                 assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
                 // verify there is no min/max/avg for weight type stats
                 assertFalse(
-                    queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey)
+                    queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeCountKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
                 );
                 continue;
             }
             assertEquals(10, (long) queryBreakDownMap.get(timingTypeKey+TIMING_TYPE_TIME_SUFFIX));
-            assertEquals(10, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey));
-            assertEquals(5, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey));
+            assertEquals(10, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey));
+            assertEquals(5, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey));
             assertEquals(0, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeKey));
             assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
-            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
+            assertEquals(1, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey));
             // min of 0 means one of the slice didn't worked on any leaf context
             assertEquals(0, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeCountKey));
-            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
+            assertEquals(0, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey));
         }
 
         assertEquals(10, testQueryProfileBreakdown.getMaxSliceNodeTime());
@@ -332,7 +332,7 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         final long createWeightEarliestStartTime = createWeightTimer.getEarliestTimerStartTime();
         final long createWeightEndTime = createWeightEarliestStartTime + createWeightTimer.getApproximateTiming();
         final Map<String, Long> leafProfileBreakdownMap_1 = getLeafBreakdownMap(createWeightEndTime + 10, 10, 1);
-        final AbstractQueryTimingProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
+        final AbstractQueryProfileBreakdown leafProfileBreakdown_1 = new TestQueryProfileBreakdown(
             leafProfileBreakdownMap_1
         );
         testQueryProfileBreakdown.getContexts().put(directoryReader.leaves().get(0), leafProfileBreakdown_1);
@@ -349,12 +349,12 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
                 assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
                 // verify there is no min/max/avg for weight type stats
                 assertFalse(
-                    queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey)
+                    queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
                         || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeCountKey)
-                        || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
+                        || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
                 );
                 continue;
             }
@@ -362,12 +362,12 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
             assertNotNull(queryBreakDownMap.get(timingTypeCountKey));
             // verify there is no min/max/avg for current breakdown type stats
             assertFalse(
-                queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeKey)
+                queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey)
                     || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeKey)
-                    || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeKey)
-                    || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
+                    || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey)
+                    || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeCountKey)
                     || queryBreakDownMap.containsKey(MIN_PREFIX + timingTypeCountKey)
-                    || queryBreakDownMap.containsKey(ConcurrentQueryTimingProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
+                    || queryBreakDownMap.containsKey(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeCountKey)
             );
         }
         assertEquals(0, testQueryProfileBreakdown.getMaxSliceNodeTime());
@@ -408,10 +408,11 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         return DirectoryReader.open(directory);
     }
 
-    private static class TestQueryProfileBreakdown extends AbstractQueryTimingProfileBreakdown {
+    private static class TestQueryProfileBreakdown extends AbstractQueryProfileBreakdown {
         private Map<String, Long> breakdownMap;
 
         public TestQueryProfileBreakdown(Map<String, Long> breakdownMap) {
+            super(Map.of());
             this.breakdownMap = breakdownMap;
         }
 
@@ -426,12 +427,7 @@ public class ConcurrentQueryTimingProfileBreakdownTests extends OpenSearchTestCa
         }
 
         @Override
-        public AbstractQueryTimingProfileBreakdown context(Object context) {
-            return null;
-        }
-
-        @Override
-        public AbstractTimingProfileBreakdown getPluginBreakdown(Object context) {
+        public AbstractQueryProfileBreakdown context(Object context) {
             return null;
         }
     }

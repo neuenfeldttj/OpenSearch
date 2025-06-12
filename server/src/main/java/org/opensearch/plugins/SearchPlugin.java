@@ -70,7 +70,8 @@ import org.opensearch.search.fetch.FetchSubPhase;
 import org.opensearch.search.fetch.subphase.highlight.Highlighter;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.AbstractProfiler;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.Metric;
 import org.opensearch.search.query.QueryPhaseSearcher;
 import org.opensearch.search.rescore.Rescorer;
 import org.opensearch.search.rescore.RescorerBuilder;
@@ -244,10 +245,9 @@ public interface SearchPlugin {
     interface ProfileBreakdownProvider {
         /**
          * Provides a profiler instance
-         * @param isConcurrentSearchEnabled concurrent enabled
          * @return profiler instance
          */
-        Map<Class<? extends Query>,Class<? extends AbstractTimingProfileBreakdown>> getProfileBreakdown(boolean isConcurrentSearchEnabled);
+        Map<Class<? extends Query>,List<Metric>> getPluginMetrics();
     }
 
     /**

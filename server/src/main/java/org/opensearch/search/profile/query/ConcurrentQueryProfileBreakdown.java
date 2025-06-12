@@ -12,8 +12,8 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.opensearch.OpenSearchException;
 import org.opensearch.core.ParseField;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
-import org.opensearch.search.profile.Timer;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.Metric;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,10 +24,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static org.opensearch.search.profile.Timer.*;
+
 /**
- * A {@link AbstractTimingProfileBreakdown} for concurrent query timings.
+ * A {@link AbstractProfileBreakdown} for concurrent query timings.
  */
-public class ConcurrentQueryTimingProfileBreakdown extends AbstractQueryTimingProfileBreakdown {
+public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdown {
     static final String SLICE_END_TIME_SUFFIX = "_slice_end_time";
     static final String SLICE_START_TIME_SUFFIX = "_slice_start_time";
     static final String MAX_PREFIX = "max_";
@@ -43,44 +45,31 @@ public class ConcurrentQueryTimingProfileBreakdown extends AbstractQueryTimingPr
     static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
 
     // keep track of all breakdown timings per segment. package-private for testing
-    private final Map<Object, AbstractQueryTimingProfileBreakdown> contexts = new ConcurrentHashMap<>();
+    private final Map<Object, AbstractQueryProfileBreakdown> contexts = new ConcurrentHashMap<>();
 
     // represents slice to leaves mapping as for each slice a unique collector instance is created
     private final Map<Collector, List<LeafReaderContext>> sliceCollectorsToLeaves = new ConcurrentHashMap<>();
 
-    private final Class<? extends AbstractTimingProfileBreakdown> pluginBreakdownClass;
-
     private Set<String> timingMetrics;
     private Set<String> nonTimingMetrics;
 
-    public ConcurrentQueryTimingProfileBreakdown(Class<? extends AbstractTimingProfileBreakdown> pluginBreakdownClass) {
-        for(QueryTimingType type : QueryTimingType.values()) {
-            timers.put(type.toString(), new Timer());
-        }
+    private final List<Metric> metrics;
 
-        this.pluginBreakdownClass = pluginBreakdownClass;
+    public ConcurrentQueryProfileBreakdown(List<Metric> metrics) {
+        super(metrics);
+        this.metrics = metrics;
     }
 
     @Override
-    public AbstractQueryTimingProfileBreakdown context(Object context) {
+    public AbstractQueryProfileBreakdown context(Object context) {
         // See please https://bugs.openjdk.java.net/browse/JDK-8161372
-        final AbstractQueryTimingProfileBreakdown profile = contexts.get(context);
+        final AbstractQueryProfileBreakdown profile = contexts.get(context);
 
         if (profile != null) {
             return profile;
         }
 
-        return contexts.computeIfAbsent(context, ctx -> new QueryTimingProfileBreakdown(pluginBreakdownClass));
-    }
-
-    @Override
-    public AbstractTimingProfileBreakdown getPluginBreakdown(Object context) {
-        final QueryTimingProfileBreakdown profile = (QueryTimingProfileBreakdown) context(context);
-
-        if (profile != null) {
-            return profile.getPluginBreakdown(context);
-        }
-        return null;
+        return contexts.computeIfAbsent(context, ctx -> new QueryProfileBreakdown(metrics));
     }
 
     @Override
@@ -117,8 +106,8 @@ public class ConcurrentQueryTimingProfileBreakdown extends AbstractQueryTimingPr
             // concurrency involved.
             assert contexts.size() == 1 : "Unexpected size: "
                     + contexts.size()
-                    + " of leaves breakdown in ConcurrentQueryTimingProfileBreakdown of rewritten query for a leaf.";
-            AbstractTimingProfileBreakdown breakdown = contexts.values().iterator().next();
+                    + " of leaves breakdown in ConcurrentQueryProfileBreakdown of rewritten query for a leaf.";
+            AbstractProfileBreakdown breakdown = contexts.values().iterator().next();
             queryNodeTime = breakdown.toNodeTime() + createWeightTime;
             maxSliceNodeTime = 0L;
             minSliceNodeTime = 0L;
@@ -462,11 +451,6 @@ public class ConcurrentQueryTimingProfileBreakdown extends AbstractQueryTimingPr
     }
 
     @Override
-    public long toNodeTime() {
-        return queryNodeTime;
-    }
-
-    @Override
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {
         // Each slice (or collector) is executed by single thread. So the list for a key will always be updated by a single thread only
         sliceCollectorsToLeaves.computeIfAbsent(collector, k -> new ArrayList<>()).add(leaf);
@@ -482,7 +466,7 @@ public class ConcurrentQueryTimingProfileBreakdown extends AbstractQueryTimingPr
     }
 
     // used by tests
-    Map<Object, AbstractQueryTimingProfileBreakdown> getContexts() {
+    Map<Object, AbstractQueryProfileBreakdown> getContexts() {
         return contexts;
     }
 

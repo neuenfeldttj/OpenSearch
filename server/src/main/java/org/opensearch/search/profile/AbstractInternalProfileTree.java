@@ -32,7 +32,7 @@
 
 package org.opensearch.search.profile;
 
-import org.opensearch.search.profile.query.QueryTimingProfileBreakdown;
+import org.opensearch.search.profile.query.QueryProfileBreakdown;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public abstract class AbstractInternalProfileTree<PB extends AbstractProfileBrea
     }
 
     /**
-     * Returns a {@link QueryTimingProfileBreakdown} for a scoring query.  Scoring queries (e.g. those
+     * Returns a {@link QueryProfileBreakdown} for a scoring query.  Scoring queries (e.g. those
      * that are past the rewrite phase and are now being wrapped by createWeight() ) follow
      * a recursive progression.  We can track the dependency tree by a simple stack
      * <p>

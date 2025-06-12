@@ -9,7 +9,8 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.AbstractTimingProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
@@ -34,9 +35,9 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
     // one thread will access the LinkedList at a time.
     private final Map<Long, LinkedList<Timer>> threadToRewriteTimers;
 
-    private final Map<Class<? extends Query>,  Class<? extends AbstractTimingProfileBreakdown>> pluginBreakdownClasses;
+    private final Map<Class<? extends Query>,  List<Metric>> pluginMetrics;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  Class<? extends AbstractTimingProfileBreakdown>> pluginBreakdownClasses) {
+    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  List<Metric>> pluginMetrics) {
         super(profileTree);
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
@@ -44,14 +45,14 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
         threadToProfileTree.put(threadId, (ConcurrentQueryProfileTree) profileTree);
         threadToRewriteTimers = new ConcurrentHashMap<>();
         threadToRewriteTimers.put(threadId, new LinkedList<>());
-        this.pluginBreakdownClasses = pluginBreakdownClasses;
+        this.pluginMetrics = pluginMetrics;
     }
 
     @Override
-    public AbstractQueryTimingProfileBreakdown getQueryBreakdown(Query query) {
+    public AbstractQueryProfileBreakdown getQueryBreakdown(Query query) {
         ConcurrentQueryProfileTree profileTree = threadToProfileTree.computeIfAbsent(
             getCurrentThreadId(),
-            k -> new ConcurrentQueryProfileTree(pluginBreakdownClasses)
+            k -> new ConcurrentQueryProfileTree(pluginMetrics)
         );
         return profileTree.getProfileBreakdown(query);
     }
@@ -84,7 +85,7 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
      */
     @Override
     public void startRewriteTime() {
-        Timer rewriteTimer = new Timer();
+        Timer rewriteTimer = new Timer("rewrite_timer");
         threadToRewriteTimers.computeIfAbsent(getCurrentThreadId(), k -> new LinkedList<>()).add(rewriteTimer);
         rewriteTimer.start();
     }

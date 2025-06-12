@@ -87,7 +87,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.opensearch.search.profile.AbstractTimingProfileBreakdown.TIMING_TYPE_TIME_SUFFIX;
+import static org.opensearch.search.profile.Timer.TIMING_TYPE_TIME_SUFFIX;
 
 public class QueryProfilerTests extends OpenSearchTestCase {
     private Directory dir;

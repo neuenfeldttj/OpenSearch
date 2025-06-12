@@ -60,23 +60,23 @@ public final class Profilers {
     private final List<QueryProfiler> queryProfilers;
     private final AggregationProfiler aggProfiler;
     private final boolean isConcurrentSegmentSearchEnabled;
-    private final Map<Class<? extends Query>, Class<? extends AbstractTimingProfileBreakdown>> pluginProfilers;
+    private final Map<Class<? extends Query>, List<Metric>> pluginMetrics;
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
-    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled, Map<Class<? extends Query>, Class<? extends AbstractTimingProfileBreakdown>> breakdownClasses) {
+    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled, Map<Class<? extends Query>, List<Metric>> pluginMetrics) {
         this.searcher = searcher;
         this.isConcurrentSegmentSearchEnabled = isConcurrentSegmentSearchEnabled;
         this.queryProfilers = new ArrayList<>();
         this.aggProfiler = isConcurrentSegmentSearchEnabled ? new ConcurrentAggregationProfiler() : new AggregationProfiler();
-        this.pluginProfilers = breakdownClasses;
+        this.pluginMetrics = pluginMetrics;
         addQueryProfiler();
     }
 
     /** Switch to a new profile. */
     public QueryProfiler addQueryProfiler() {
         QueryProfiler profiler = isConcurrentSegmentSearchEnabled
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(pluginProfilers), pluginProfilers)
-            : new QueryProfiler(new InternalQueryProfileTree(pluginProfilers));
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(pluginMetrics), pluginMetrics)
+            : new QueryProfiler(new InternalQueryProfileTree(pluginMetrics));
         searcher.setQueryProfiler(profiler);
         queryProfilers.add(profiler);
         return profiler;
