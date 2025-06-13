@@ -496,8 +496,14 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
                     Map<String, Long> breakdown = result.getBreakdown();
+                    Long maxSliceTime = result.getMaxSliceTime();
+                    Long minSliceTime = result.getMinSliceTime();
+                    Long avgSliceTime = result.getAvgSliceTime();
                     if (concurrentSearchEnabled && results.get(0).equals(result)) {
-                        assertThat(breakdown.size(), equalTo(70));
+                        assertNotNull(maxSliceTime);
+                        assertNotNull(minSliceTime);
+                        assertNotNull(avgSliceTime);
+                        assertThat(breakdown.size(), equalTo(66));
                         for (QueryTimingType queryTimingType : QueryTimingType.values()) {
                             if (queryTimingType != QueryTimingType.CREATE_WEIGHT) {
                                 String maxTimingType = MAX_PREFIX + queryTimingType;
@@ -512,9 +518,15 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                             }
                         }
                     } else if (concurrentSearchEnabled) {
-                        assertThat(breakdown.size(), equalTo(28));
+                        assertThat(maxSliceTime, equalTo(0L));
+                        assertThat(minSliceTime, equalTo(0L));
+                        assertThat(avgSliceTime, equalTo(0L));
+                        assertThat(breakdown.size(), equalTo(27));
                     } else {
-                        assertThat(breakdown.size(), equalTo(28));
+                        assertThat(maxSliceTime, is(nullValue()));
+                        assertThat(minSliceTime, is(nullValue()));
+                        assertThat(avgSliceTime, is(nullValue()));
+                        assertThat(breakdown.size(), equalTo(27));
                     }
                 }
 
@@ -685,8 +697,14 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
 
     private void assertQueryProfileResult(ProfileResult result) {
         Map<String, Long> breakdown = result.getBreakdown();
+        Long maxSliceTime = result.getMaxSliceTime();
+        Long minSliceTime = result.getMinSliceTime();
+        Long avgSliceTime = result.getAvgSliceTime();
         if (concurrentSearchEnabled) {
-            assertThat(breakdown.size(), equalTo(70));
+            assertNotNull(maxSliceTime);
+            assertNotNull(minSliceTime);
+            assertNotNull(avgSliceTime);
+            assertThat(breakdown.size(), equalTo(66));
             for (QueryTimingType queryTimingType : QueryTimingType.values()) {
                 if (queryTimingType != QueryTimingType.CREATE_WEIGHT) {
                     String maxTimingType = MAX_PREFIX + queryTimingType;
@@ -701,7 +719,10 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                 }
             }
         } else {
-            assertThat(breakdown.size(), equalTo(28));
+            assertThat(maxSliceTime, is(nullValue()));
+            assertThat(minSliceTime, is(nullValue()));
+            assertThat(avgSliceTime, is(nullValue()));
+            assertThat(breakdown.size(), equalTo(27));
         }
     }
 
