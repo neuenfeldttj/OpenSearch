@@ -74,11 +74,6 @@ public abstract class AbstractProfileBreakdown {
     }
 
     /**
-     * Gather important metrics for current instance
-     */
-    abstract public Map<String, Long> toImportantMetricsMap();
-
-    /**
      * Build a breakdown for current instance
      */
     public Map<String, Long> toBreakdownMap() {
@@ -107,11 +102,4 @@ public abstract class AbstractProfileBreakdown {
         return emptyMap();
     }
 
-    /**
-     *
-     * @return a {@link BiFunction} that handles the concurrent plugin metric for the profiler
-     */
-    public BiFunction<String, Long, Long> handleConcurrentPluginMetric() {
-        throw new IllegalCallerException("must be overridden by plugin");
-    }
 }

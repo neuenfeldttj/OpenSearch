@@ -417,11 +417,6 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
         }
 
         @Override
-        public Map<String, Long> toImportantMetricsMap() {
-            return Map.of();
-        }
-
-        @Override
         public Map<String, Long> toBreakdownMap() {
             return breakdownMap;
         }

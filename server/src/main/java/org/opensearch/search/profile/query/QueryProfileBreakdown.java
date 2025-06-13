@@ -30,13 +30,6 @@ public class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
     }
 
     @Override
-    public Map<String, Long> toImportantMetricsMap() {
-        Map<String, Long> map = new HashMap<>();
-        map.put(NODE_TIME_RAW, toNodeTime());
-        return map;
-    }
-
-    @Override
     public AbstractQueryProfileBreakdown context(Object context) {
         return this;
     }

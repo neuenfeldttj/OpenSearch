@@ -37,10 +37,6 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
     private long minSliceNodeTime = Long.MAX_VALUE;
     private long avgSliceNodeTime = 0L;
 
-    static final ParseField MAX_SLICE_NODE_TIME_RAW = new ParseField("max_slice_time_in_nanos");
-    static final ParseField MIN_SLICE_NODE_TIME_RAW = new ParseField("min_slice_time_in_nanos");
-    static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
-
     // keep track of all breakdown timings per segment. package-private for testing
     private final Map<Object, AbstractQueryProfileBreakdown> contexts = new ConcurrentHashMap<>();
 
@@ -68,16 +64,6 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
         }
 
         return contexts.computeIfAbsent(context, ctx -> new QueryProfileBreakdown(metrics));
-    }
-
-    @Override
-    public Map<String, Long> toImportantMetricsMap() {
-        Map<String, Long> map = new HashMap<>();
-        map.put(NODE_TIME_RAW, queryNodeTime);
-        map.put(MAX_SLICE_NODE_TIME_RAW.getPreferredName(), maxSliceNodeTime);
-        map.put(MIN_SLICE_NODE_TIME_RAW.getPreferredName(), minSliceNodeTime);
-        map.put(AVG_SLICE_NODE_TIME_RAW.getPreferredName(), avgSliceNodeTime);
-        return map;
     }
 
     @Override
@@ -447,6 +433,11 @@ public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdo
             }
         }
         return nonTimingMetrics;
+    }
+
+    @Override
+    public long toNodeTime() {
+        return queryNodeTime;
     }
 
     @Override

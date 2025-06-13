@@ -32,7 +32,9 @@
 
 package org.opensearch.search.profile;
 
+import org.opensearch.Version;
 import org.opensearch.common.annotation.PublicApi;
+import org.opensearch.common.unit.TimeValue;
 import org.opensearch.core.ParseField;
 import org.opensearch.core.common.io.stream.StreamInput;
 import org.opensearch.core.common.io.stream.StreamOutput;
@@ -43,7 +45,13 @@ import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static org.opensearch.core.xcontent.ConstructingObjectParser.constructorArg;
 import static org.opensearch.core.xcontent.ConstructingObjectParser.optionalConstructorArg;
@@ -60,35 +68,62 @@ import static org.opensearch.core.xcontent.ConstructingObjectParser.optionalCons
  * @opensearch.api
  */
 @PublicApi(since = "1.0.0")
-public class ProfileResult implements Writeable, ToXContentObject {
-    protected static final ParseField TYPE = new ParseField("type");
-    protected static final ParseField METRICS = new ParseField("important_metrics");
-    protected static final ParseField DESCRIPTION = new ParseField("description");
-    protected static final ParseField BREAKDOWN = new ParseField("breakdown");
-    protected static final ParseField DEBUG = new ParseField("debug");
-    protected static final ParseField CHILDREN = new ParseField("children");
+public final class ProfileResult implements Writeable, ToXContentObject {
+    static final ParseField TYPE = new ParseField("type");
+    static final ParseField DESCRIPTION = new ParseField("description");
+    static final ParseField BREAKDOWN = new ParseField("breakdown");
+    static final ParseField DEBUG = new ParseField("debug");
+    static final ParseField NODE_TIME = new ParseField("time");
+    static final ParseField MAX_SLICE_NODE_TIME = new ParseField("max_slice_time");
+    static final ParseField MIN_SLICE_NODE_TIME = new ParseField("min_slice_time");
+    static final ParseField AVG_SLICE_NODE_TIME = new ParseField("avg_slice_time");
+    static final ParseField NODE_TIME_RAW = new ParseField("time_in_nanos");
+    static final ParseField MAX_SLICE_NODE_TIME_RAW = new ParseField("max_slice_time_in_nanos");
+    static final ParseField MIN_SLICE_NODE_TIME_RAW = new ParseField("min_slice_time_in_nanos");
+    static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
+    static final ParseField CHILDREN = new ParseField("children");
 
-    protected final String type;
-    protected final String description;
-    protected final Map<String, Long> importantMetrics;
-    protected final Map<String, Long> breakdown;
-    protected final Map<String, Object> debug;
-    protected List<ProfileResult> children;
+    private final String type;
+    private final String description;
+    private final Map<String, Long> breakdown;
+    private final Map<String, Object> debug;
+    private final long nodeTime;
+    private Long maxSliceNodeTime;
+    private Long minSliceNodeTime;
+    private Long avgSliceNodeTime;
+    private final List<ProfileResult> children;
 
     public ProfileResult(
         String type,
         String description,
         Map<String, Long> breakdown,
-        Map<String, Long> importantMetrics,
         Map<String, Object> debug,
+        long nodeTime,
         List<ProfileResult> children
+    ) {
+        this(type, description, breakdown, debug, nodeTime, children, null, null, null);
+    }
+
+    public ProfileResult(
+        String type,
+        String description,
+        Map<String, Long> breakdown,
+        Map<String, Object> debug,
+        long nodeTime,
+        List<ProfileResult> children,
+        Long maxSliceNodeTime,
+        Long minSliceNodeTime,
+        Long avgSliceNodeTime
     ) {
         this.type = type;
         this.description = description;
         this.breakdown = Objects.requireNonNull(breakdown, "required breakdown argument missing");
-        this.importantMetrics = importantMetrics == null ? Map.of() : importantMetrics;
         this.debug = debug == null ? Map.of() : debug;
         this.children = children == null ? List.of() : children;
+        this.nodeTime = nodeTime;
+        this.maxSliceNodeTime = maxSliceNodeTime;
+        this.minSliceNodeTime = minSliceNodeTime;
+        this.avgSliceNodeTime = avgSliceNodeTime;
     }
 
     /**
@@ -97,20 +132,34 @@ public class ProfileResult implements Writeable, ToXContentObject {
     public ProfileResult(StreamInput in) throws IOException {
         this.type = in.readString();
         this.description = in.readString();
+        this.nodeTime = in.readLong();
         breakdown = in.readMap(StreamInput::readString, StreamInput::readLong);
-        importantMetrics = in.readMap(StreamInput::readString, StreamInput::readLong);
         debug = in.readMap(StreamInput::readString, StreamInput::readGenericValue);
         children = in.readList(ProfileResult::new);
+        if (in.getVersion().onOrAfter(Version.V_2_10_0)) {
+            this.maxSliceNodeTime = in.readOptionalLong();
+            this.minSliceNodeTime = in.readOptionalLong();
+            this.avgSliceNodeTime = in.readOptionalLong();
+        } else {
+            this.maxSliceNodeTime = null;
+            this.minSliceNodeTime = null;
+            this.avgSliceNodeTime = null;
+        }
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         out.writeString(type);
         out.writeString(description);
+        out.writeLong(nodeTime);            // not Vlong because can be negative
         out.writeMap(breakdown, StreamOutput::writeString, StreamOutput::writeLong);
-        out.writeMap(importantMetrics, StreamOutput::writeString, StreamOutput::writeLong);
         out.writeMap(debug, StreamOutput::writeString, StreamOutput::writeGenericValue);
         out.writeList(children);
+        if (out.getVersion().onOrAfter(Version.V_2_10_0)) {
+            out.writeOptionalLong(maxSliceNodeTime);
+            out.writeOptionalLong(minSliceNodeTime);
+            out.writeOptionalLong(avgSliceNodeTime);
+        }
     }
 
     /**
@@ -128,14 +177,7 @@ public class ProfileResult implements Writeable, ToXContentObject {
     }
 
     /**
-     * The important metrics for this node.
-     */
-    public Map<String, Long> getImportantMetrics() {
-        return Collections.unmodifiableMap(importantMetrics);
-    }
-
-    /**
-     * The breakdown for this node.
+     * The timing breakdown for this node.
      */
     public Map<String, Long> getBreakdown() {
         return Collections.unmodifiableMap(breakdown);
@@ -149,6 +191,27 @@ public class ProfileResult implements Writeable, ToXContentObject {
     }
 
     /**
+     * Returns the total time (inclusive of children) for this query node.
+     *
+     * @return  elapsed time in nanoseconds
+     */
+    public long getTime() {
+        return nodeTime;
+    }
+
+    public Long getMaxSliceTime() {
+        return maxSliceNodeTime;
+    }
+
+    public Long getMinSliceTime() {
+        return minSliceNodeTime;
+    }
+
+    public Long getAvgSliceTime() {
+        return avgSliceNodeTime;
+    }
+
+    /**
      * Returns a list of all profiled children queries
      */
     public List<ProfileResult> getProfiledChildren() {
@@ -158,14 +221,33 @@ public class ProfileResult implements Writeable, ToXContentObject {
     @Override
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         builder.startObject();
-        builder.field(TYPE.getPreferredName(), getQueryName());
-        builder.field(DESCRIPTION.getPreferredName(), getLuceneDescription());
-        createBreakdownView(builder);
-        if (importantMetrics.isEmpty() == false) {
-            builder.field(METRICS.getPreferredName(), getImportantMetrics());
+        builder.field(TYPE.getPreferredName(), type);
+        builder.field(DESCRIPTION.getPreferredName(), description);
+        if (builder.humanReadable()) {
+            builder.field(NODE_TIME.getPreferredName(), new TimeValue(getTime(), TimeUnit.NANOSECONDS).toString());
+            if (getMaxSliceTime() != null) {
+                builder.field(MAX_SLICE_NODE_TIME.getPreferredName(), new TimeValue(getMaxSliceTime(), TimeUnit.NANOSECONDS).toString());
+            }
+            if (getMinSliceTime() != null) {
+                builder.field(MIN_SLICE_NODE_TIME.getPreferredName(), new TimeValue(getMinSliceTime(), TimeUnit.NANOSECONDS).toString());
+            }
+            if (getAvgSliceTime() != null) {
+                builder.field(AVG_SLICE_NODE_TIME.getPreferredName(), new TimeValue(getAvgSliceTime(), TimeUnit.NANOSECONDS).toString());
+            }
         }
-        if (false == getDebugInfo().isEmpty()) {
-            builder.field(DEBUG.getPreferredName(), getDebugInfo());
+        builder.field(NODE_TIME_RAW.getPreferredName(), getTime());
+        if (getMaxSliceTime() != null) {
+            builder.field(MAX_SLICE_NODE_TIME_RAW.getPreferredName(), getMaxSliceTime());
+        }
+        if (getMinSliceTime() != null) {
+            builder.field(MIN_SLICE_NODE_TIME_RAW.getPreferredName(), getMinSliceTime());
+        }
+        if (getAvgSliceTime() != null) {
+            builder.field(AVG_SLICE_NODE_TIME_RAW.getPreferredName(), getAvgSliceTime());
+        }
+        createBreakdownView(builder);
+        if (false == debug.isEmpty()) {
+            builder.field(DEBUG.getPreferredName(), debug);
         }
 
         if (false == children.isEmpty()) {
@@ -205,9 +287,12 @@ public class ProfileResult implements Writeable, ToXContentObject {
         parser.declareString(constructorArg(), TYPE);
         parser.declareString(constructorArg(), DESCRIPTION);
         parser.declareObject(constructorArg(), (p, c) -> p.map(), BREAKDOWN);
-        parser.declareObject(optionalConstructorArg(), (p, c) -> p.map(), METRICS);
         parser.declareObject(optionalConstructorArg(), (p, c) -> p.map(), DEBUG);
+        parser.declareLong(constructorArg(), NODE_TIME_RAW);
         parser.declareObjectArray(optionalConstructorArg(), (p, c) -> fromXContent(p), CHILDREN);
+        parser.declareLong(optionalConstructorArg(), MAX_SLICE_NODE_TIME_RAW);
+        parser.declareLong(optionalConstructorArg(), MIN_SLICE_NODE_TIME_RAW);
+        parser.declareLong(optionalConstructorArg(), AVG_SLICE_NODE_TIME_RAW);
         PARSER = parser.build();
     }
 

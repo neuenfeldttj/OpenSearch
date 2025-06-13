@@ -46,6 +46,28 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
         return new ConcurrentQueryProfileBreakdown(metrics);
     }
 
+    @Override
+    protected ProfileResult createProfileResult(
+        String type,
+        String description,
+        AbstractQueryProfileBreakdown breakdown,
+        List<ProfileResult> childrenProfileResults
+    ) {
+        assert breakdown instanceof ConcurrentQueryProfileBreakdown;
+        final ConcurrentQueryProfileBreakdown concurrentBreakdown = (ConcurrentQueryProfileBreakdown) breakdown;
+        return new ProfileResult(
+            type,
+            description,
+            concurrentBreakdown.toBreakdownMap(),
+            concurrentBreakdown.toDebugMap(),
+            concurrentBreakdown.toNodeTime(),
+            childrenProfileResults,
+            concurrentBreakdown.getMaxSliceNodeTime(),
+            concurrentBreakdown.getMinSliceNodeTime(),
+            concurrentBreakdown.getAvgSliceNodeTime()
+        );
+    }
+
     /**
      * For concurrent query case, when there are nested queries (with children), then the {@link ConcurrentQueryProfileBreakdown} created
      * for the child queries weight doesn't have the association of collector to leaves. This is because child query weights are not

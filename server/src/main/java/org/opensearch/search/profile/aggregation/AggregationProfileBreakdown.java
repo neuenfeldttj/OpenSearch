@@ -30,11 +30,6 @@ public class AggregationProfileBreakdown extends AbstractProfileBreakdown {
         super(timers);
     }
 
-    @Override
-    public Map<String, Long> toImportantMetricsMap() {
-        return Map.of();
-    }
-
     /**
      * Add extra debugging information about the aggregation.
      */
