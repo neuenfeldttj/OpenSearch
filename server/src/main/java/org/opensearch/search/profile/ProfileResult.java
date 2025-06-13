@@ -43,10 +43,7 @@ import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static org.opensearch.core.xcontent.ConstructingObjectParser.constructorArg;
 import static org.opensearch.core.xcontent.ConstructingObjectParser.optionalConstructorArg;
@@ -163,7 +160,7 @@ public class ProfileResult implements Writeable, ToXContentObject {
         builder.startObject();
         builder.field(TYPE.getPreferredName(), getQueryName());
         builder.field(DESCRIPTION.getPreferredName(), getLuceneDescription());
-        builder.field(BREAKDOWN.getPreferredName(), getBreakdown());
+        createBreakdownView(builder);
         if (importantMetrics.isEmpty() == false) {
             builder.field(METRICS.getPreferredName(), getImportantMetrics());
         }
@@ -180,6 +177,22 @@ public class ProfileResult implements Writeable, ToXContentObject {
         }
 
         return builder.endObject();
+    }
+
+    private void createBreakdownView(XContentBuilder builder) throws IOException {
+        Map<String, Long> modifiedBreakdown = new LinkedHashMap<>(breakdown);
+        removeStartTimeFields(modifiedBreakdown);
+        builder.field(BREAKDOWN.getPreferredName(), modifiedBreakdown);
+    }
+
+    static void removeStartTimeFields(Map<String, Long> modifiedBreakdown) {
+        Iterator<Map.Entry<String, Long>> iterator = modifiedBreakdown.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Long> entry = iterator.next();
+            if (entry.getKey().endsWith(Timer.TIMING_TYPE_START_TIME_SUFFIX)) {
+                iterator.remove();
+            }
+        }
     }
 
     private static final InstantiatingObjectParser<ProfileResult, Void> PARSER;
