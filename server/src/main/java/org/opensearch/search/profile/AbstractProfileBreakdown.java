@@ -52,8 +52,6 @@ import static java.util.Collections.emptyMap;
 @PublicApi(since="3.0.0")
 public abstract class AbstractProfileBreakdown {
 
-    public static final String NODE_TIME_RAW = "time_in_nanos";
-
     private final Map<String, Metric> metrics;
 
     /** Sole constructor. */

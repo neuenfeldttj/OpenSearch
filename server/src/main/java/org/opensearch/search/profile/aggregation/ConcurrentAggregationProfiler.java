@@ -63,7 +63,7 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
         List<ProfileResult> children = new LinkedList<>();
 
         for (ProfileResult profileResult : profileResultsAcrossSlices) {
-            long profileNodeTime = profileResult.getBreakdown().get(AbstractProfileBreakdown.NODE_TIME_RAW);
+            long profileNodeTime = profileResult.getTime();
             long sliceStartTime = profileResult.getBreakdown().get(START_TIME_KEY);
 
             // Profiled total time
