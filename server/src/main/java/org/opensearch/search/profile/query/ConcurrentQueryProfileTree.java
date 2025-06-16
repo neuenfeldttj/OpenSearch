@@ -16,7 +16,6 @@ import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -24,9 +24,13 @@ import java.util.stream.Collectors;
 import static org.opensearch.search.profile.Timer.*;
 
 /**
- * A {@link AbstractProfileBreakdown} for concurrent query timings.
+ * A record of timings for the various operations that may happen during query execution.
+ * A node's time may be composed of several internal attributes (rewriting, weighting,
+ * scoring, etc). The class supports profiling the concurrent search over segments.
+ *
+ * @opensearch.internal
  */
-public class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdown {
+public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdown {
     static final String SLICE_END_TIME_SUFFIX = "_slice_end_time";
     static final String SLICE_START_TIME_SUFFIX = "_slice_start_time";
     static final String MAX_PREFIX = "max_";

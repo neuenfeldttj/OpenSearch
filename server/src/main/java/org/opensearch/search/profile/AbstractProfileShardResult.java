@@ -26,12 +26,9 @@ import static org.opensearch.core.xcontent.XContentParserUtils.ensureExpectedTok
 /**
  * Profile shard level result that corresponds to a {@link ProfileResult}
  *
- * @opensearch.api
+ * @opensearch.internal
  */
-@PublicApi(since = "3.0.0")
 public class AbstractProfileShardResult implements Writeable, ToXContentObject {
-
-    public static final String RESULTS_ARRAY = "results";
 
     protected final List<ProfileResult> profileResults;
 
@@ -82,13 +79,6 @@ public class AbstractProfileShardResult implements Writeable, ToXContentObject {
 
     @Override
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
-        builder.startObject();
-        builder.startArray(RESULTS_ARRAY);
-        for (ProfileResult p : profileResults) {
-            p.toXContent(builder, params);
-        }
-        builder.endArray();
-        builder.endObject();
-        return builder;
+        throw new RuntimeException("must override this function in a subclass!");
     }
 }

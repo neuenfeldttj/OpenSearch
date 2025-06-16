@@ -20,8 +20,9 @@ import java.util.Map;
 
 /**
  * A {@link AbstractProfileBreakdown} for query timings with contexts.
+ *
+ * @opensearch.internal
  */
-@PublicApi(since="3.0.0")
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
     /**

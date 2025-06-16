@@ -37,9 +37,13 @@ import org.opensearch.search.profile.Metric;
 import java.util.Map;
 
 /**
- * A {@link AbstractProfileBreakdown} for query timings.
+ * A record of timings for the various operations that may happen during query execution.
+ * A node's time may be composed of several internal attributes (rewriting, weighting,
+ * scoring, etc).
+ *
+ * @opensearch.internal
  */
-public class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
+public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
     public QueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
         super(metrics);

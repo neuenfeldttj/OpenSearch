@@ -9,7 +9,6 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
