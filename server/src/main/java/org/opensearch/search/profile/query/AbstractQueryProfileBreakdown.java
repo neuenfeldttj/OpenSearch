@@ -21,19 +21,9 @@ import java.util.Map;
 /**
  * A {@link AbstractProfileBreakdown} for query timings with contexts.
  *
- * @opensearch.api
+ * @opensearch.internal
  */
-@PublicApi(since = "3.0.0")
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
-
-    /**
-     * Sole constructor.
-     *
-     * @param metrics
-     */
-    public AbstractQueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
-        super(metrics);
-    }
 
     public abstract AbstractQueryProfileBreakdown context(Object context);
 

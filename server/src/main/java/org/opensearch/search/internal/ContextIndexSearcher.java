@@ -73,12 +73,9 @@ import org.opensearch.search.DocValueFormat;
 import org.opensearch.search.SearchService;
 import org.opensearch.search.approximate.ApproximateScoreQuery;
 import org.opensearch.search.dfs.AggregatedDfs;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.Timer;
-import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
-import org.opensearch.search.profile.query.ProfileWeight;
-import org.opensearch.search.profile.query.QueryProfiler;
-import org.opensearch.search.profile.query.QueryTimingType;
+import org.opensearch.search.profile.query.*;
 import org.opensearch.search.query.QueryPhase;
 import org.opensearch.search.query.QuerySearchResult;
 import org.opensearch.search.sort.FieldSortBuilder;
@@ -113,6 +110,8 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
     private QueryProfiler profiler;
     private MutableQueryTimeout cancellable;
     private SearchContext searchContext;
+
+    private List<QueryProfiler> pluginProfilers;
 
     public ContextIndexSearcher(
         IndexReader reader,
@@ -151,16 +150,25 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         setQueryCachingPolicy(queryCachingPolicy);
         this.cancellable = cancellable;
         this.searchContext = searchContext;
+        this.pluginProfilers = new ArrayList<>();
     }
 
     public void setQueryProfiler(QueryProfiler profiler) {
         this.profiler = profiler;
     }
 
-    public QueryProfiler getQueryProfiler() {
-        return profiler;
+    public void setPluginProfilers(List<QueryProfiler> pluginProfilers) {
+        this.pluginProfilers = pluginProfilers;
     }
 
+    public QueryProfiler getPluginProfiler(Class<? extends Class<? extends QueryProfiler>> clazz) {
+        for (QueryProfiler profiler : pluginProfilers) {
+            if (profiler.getClass().equals(clazz)) {
+                return profiler;
+            }
+        }
+        return null;
+    }
 
     /**
      * Add a {@link Runnable} that will be run on a regular basis while accessing documents in the
@@ -219,12 +227,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // createWeight() is called for each query in the tree, so we tell the queryProfiler
             // each invocation so that it can build an internal representation of the query
             // tree
-            AbstractQueryProfileBreakdown profile = null;
-            try {
-                profile = profiler.getQueryBreakdown(query);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            AbstractQueryProfileBreakdown profile = profiler.getBreakdown(query);
             Timer timer = (Timer) profile.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
             timer.start();
             final Weight weight;
@@ -471,10 +474,10 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         } else if (liveDocs instanceof CombinedBitSet
             // if the underlying role bitset is sparse
             && ((CombinedBitSet) liveDocs).getFirst() instanceof SparseFixedBitSet) {
-                return (BitSet) liveDocs;
-            } else {
-                return null;
-            }
+            return (BitSet) liveDocs;
+        } else {
+            return null;
+        }
 
     }
 

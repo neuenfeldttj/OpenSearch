@@ -65,6 +65,7 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
     private static final String SEARCHES_FIELD = "searches";
     private static final String ID_FIELD = "id";
     private static final String SHARDS_FIELD = "shards";
+    private static final String PLUGINS_FIELD = "plugins";
     public static final String PROFILE_FIELD = "profile";
     public static final String INBOUND_NETWORK_FIELD = "inbound_network_time_in_millis";
     public static final String OUTBOUND_NETWORK_FIELD = "outbound_network_time_in_millis";
@@ -117,6 +118,11 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
                 result.toXContent(builder, params);
             }
             builder.endArray();
+            builder.startArray(PLUGINS_FIELD);
+            for (AbstractProfileShardResult result : profileShardResult.getPluginProfileResults()) {
+                result.toXContent(builder, params);
+            }
+            builder.endArray();
             profileShardResult.getAggregationProfileResults().toXContent(builder, params);
             builder.endObject();
         }
@@ -149,6 +155,7 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         XContentParser.Token token = parser.currentToken();
         ensureExpectedToken(XContentParser.Token.START_OBJECT, token, parser);
         List<QueryProfileShardResult> queryProfileResults = new ArrayList<>();
+        List<AbstractProfileShardResult> pluginProfileResults = new ArrayList<>();
         AggregationProfileShardResult aggProfileShardResult = null;
         String id = null;
         String currentFieldName = null;
@@ -172,6 +179,10 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
                     while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
                         queryProfileResults.add(QueryProfileShardResult.fromXContent(parser));
                     }
+                } else if (PLUGINS_FIELD.equals(currentFieldName)) {
+                    while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
+                        pluginProfileResults.add(AbstractProfileShardResult.fromXContent(parser));
+                    }
                 } else if (AggregationProfileShardResult.AGGREGATIONS.equals(currentFieldName)) {
                     aggProfileShardResult = AggregationProfileShardResult.fromXContent(parser);
                 } else {
@@ -182,7 +193,7 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             }
         }
         NetworkTime networkTime = new NetworkTime(inboundNetworkTime, outboundNetworkTime);
-        searchProfileResults.put(id, new ProfileShardResult(queryProfileResults, aggProfileShardResult, networkTime));
+        searchProfileResults.put(id, new ProfileShardResult(queryProfileResults, aggProfileShardResult, pluginProfileResults, networkTime));
     }
 
     /**
@@ -197,17 +208,23 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
     public static ProfileShardResult buildShardResults(Profilers profilers, ShardSearchRequest request) {
         List<QueryProfiler> queryProfilers = profilers.getQueryProfilers();
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
+        List<QueryProfiler> pluginProfilers = profilers.getPluginProfilers();
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
+        List<AbstractProfileShardResult> pluginResults = new ArrayList<>(pluginProfilers.size());
         for (QueryProfiler queryProfiler : queryProfilers) {
             QueryProfileShardResult result = queryProfiler.createProfileShardResult();
             queryResults.add(result);
         }
         AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
+        for(QueryProfiler profiler : pluginProfilers) {
+            AbstractProfileShardResult result = profiler.createProfileShardResult();
+            pluginResults.add(result);
+        }
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {
             networkTime.setInboundNetworkTime(request.getInboundNetworkTime());
             networkTime.setOutboundNetworkTime(request.getOutboundNetworkTime());
         }
-        return new ProfileShardResult(queryResults, aggResults, networkTime);
+        return new ProfileShardResult(queryResults, aggResults, pluginResults, networkTime);
     }
 }

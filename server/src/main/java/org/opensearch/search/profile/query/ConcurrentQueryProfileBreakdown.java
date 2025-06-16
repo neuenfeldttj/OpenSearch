@@ -17,6 +17,7 @@ import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Timer;
 import org.opensearch.search.sort.BucketedSort;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -47,15 +48,10 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     // represents slice to leaves mapping as for each slice a unique collector instance is created
     private final Map<Collector, List<LeafReaderContext>> sliceCollectorsToLeaves = new ConcurrentHashMap<>();
 
-    private final Map<String, Class<? extends Metric>> metrics;
-    private final Set<String> timingMetrics;
-    private final Set<String> nonTimingMetrics;
+    private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
-        super(metrics);
-        this.metrics = metrics;
-        this.timingMetrics = getTimingMetrics();
-        this.nonTimingMetrics = getNonTimingMetrics();
+    public ConcurrentQueryProfileBreakdown(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        this.breakdownClass = breakdownClass;
     }
 
     @Override
@@ -67,7 +63,13 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             return profile;
         }
 
-        return contexts.computeIfAbsent(context, ctx -> new QueryProfileBreakdown(metrics));
+        return contexts.computeIfAbsent(context, ctx -> {
+            try {
+                return breakdownClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -316,7 +318,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
         queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_COUNT_SUFFIX, 1L);
         queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT.toString(), createWeightTime);
 
-        for(String metric : timingMetrics) {
+        for(String metric : get) {
 
             if(metric.equals(QueryTimingType.CREATE_WEIGHT.toString())) {
                 // create weight time is computed at query level and is called only once per query
@@ -417,26 +419,6 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             avgKey,
             (key, value) -> (value == null) ? sliceValue : (value + sliceValue)
         );
-    }
-
-    private Set<String> getTimingMetrics() {
-        Set<String> timingMetrics = new HashSet<>();
-        for(Map.Entry<String, Class<? extends Metric>> entry : metrics.entrySet()) {
-            if(entry.getValue().equals(Timer.class)) {
-               timingMetrics.add(entry.getKey());
-            }
-        }
-       return timingMetrics;
-    }
-
-    private Set<String> getNonTimingMetrics() {
-        Set<String> nonTimingMetrics = new HashSet<>();
-        for(Map.Entry<String, Class<? extends Metric>> entry : metrics.entrySet()) {
-            if(!entry.getValue().equals(Timer.class)) {
-                nonTimingMetrics.add(entry.getKey());
-            }
-        }
-        return nonTimingMetrics;
     }
 
     @Override

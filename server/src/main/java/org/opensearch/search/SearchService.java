@@ -134,6 +134,9 @@ import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Profilers;
+import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.query.InternalQueryProfileTree;
+import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.query.QueryPhase;
 import org.opensearch.search.query.QuerySearchRequest;
 import org.opensearch.search.query.QuerySearchResult;
@@ -420,7 +423,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     private final Executor indexSearcherExecutor;
     private final TaskResourceTrackingService taskResourceTrackingService;
 
-    private final List<SearchPlugin.PluginMetricsProvider> pluginProfilers;
+    private final List<SearchPlugin.ProfilerProvider> pluginProfilers;
 
     public SearchService(
         ClusterService clusterService,
@@ -435,7 +438,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         Executor indexSearcherExecutor,
         TaskResourceTrackingService taskResourceTrackingService,
         Collection<ConcurrentSearchRequestDecider.Factory> concurrentSearchDeciderFactories,
-        List<SearchPlugin.PluginMetricsProvider> pluginProfilers
+        List<SearchPlugin.ProfilerProvider> pluginProfilers
     ) {
         Settings settings = clusterService.getSettings();
         this.threadPool = threadPool;
@@ -1564,12 +1567,13 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         }
         context.evaluateRequestShouldUseConcurrentSearch();
         if (source.profile()) {
-            Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics = new HashMap<>();
-            for(SearchPlugin.PluginMetricsProvider p : pluginProfilers) {
-                Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> metrics = p.getPluginMetrics();
-                pluginMetrics.putAll(metrics);
+            Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch());
+            for(SearchPlugin.ProfilerProvider p : pluginProfilers) {
+                Class<? extends QueryProfiler> profiler = p.getProfiler();
+                Class<? extends InternalQueryProfileTree> tree = p.getProfileTree();
+                Class<? extends AbstractQueryProfileBreakdown> breakdown = p.getProfileBreakdown();
+                profilers.addPluginProfiler(profiler, tree, breakdown);
             }
-            Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch(), pluginMetrics);
             context.setProfilers(profilers);
         }
 

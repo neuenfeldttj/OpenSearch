@@ -32,9 +32,9 @@
 
 package org.opensearch.search.profile;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import org.apache.lucene.index.MergeTrigger;
+
+import java.util.*;
 
 import static java.util.Collections.emptyMap;
 
@@ -47,23 +47,34 @@ import static java.util.Collections.emptyMap;
  */
 public abstract class AbstractProfileBreakdown {
 
-    private final Map<String, Metric> metrics;
+    private Map<String, Metric> metrics;
 
-    /** Sole constructor. */
-    public AbstractProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
-        Map<String, Metric> map = new HashMap<>();
-        for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
-            try {
-                map.put(entry.getKey(), entry.getValue().getConstructor(String.class).newInstance(entry.getKey()));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        this.metrics = map;
+    public void setMetrics(Map<String, Metric> metrics) {
+        this.metrics = metrics;
     }
 
     public Metric getMetric(String name) {
         return metrics.get(name);
+    }
+
+    public Set<String> getTimingMetrics() {
+        Set<String> timingMetrics = new HashSet<>();
+        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+            if(entry.getValue().getClass().equals(Timer.class)) {
+               timingMetrics.add(entry.getKey());
+            }
+        }
+        return timingMetrics;
+    }
+
+    public Set<String> getNonTimingMetrics() {
+        Set<String> nonTimingMetrics = new HashSet<>();
+        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+            if(!entry.getValue().getClass().equals(Timer.class)) {
+                nonTimingMetrics.add(entry.getKey());
+            }
+        }
+        return nonTimingMetrics;
     }
 
     /**

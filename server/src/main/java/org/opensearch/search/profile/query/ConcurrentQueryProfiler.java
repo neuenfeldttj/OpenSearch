@@ -34,9 +34,13 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
     // one thread will access the LinkedList at a time.
     private final Map<Long, LinkedList<Timer>> threadToRewriteTimers;
 
-    private final Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics;
+    private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics) {
+    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree) {
+        this(profileTree, QueryProfileBreakdown.class);
+    }
+
+    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
         super(profileTree);
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
@@ -44,14 +48,14 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
         threadToProfileTree.put(threadId, (ConcurrentQueryProfileTree) profileTree);
         threadToRewriteTimers = new ConcurrentHashMap<>();
         threadToRewriteTimers.put(threadId, new LinkedList<>());
-        this.pluginMetrics = pluginMetrics;
+        this.breakdownClass = breakdownClass;
     }
 
     @Override
-    public AbstractQueryProfileBreakdown getQueryBreakdown(Query query) {
+    public AbstractQueryProfileBreakdown getBreakdown(Query query) {
         ConcurrentQueryProfileTree profileTree = threadToProfileTree.computeIfAbsent(
             getCurrentThreadId(),
-            k -> new ConcurrentQueryProfileTree(pluginMetrics)
+            k -> new ConcurrentQueryProfileTree(breakdownClass)
         );
         return profileTree.getProfileBreakdown(query);
     }

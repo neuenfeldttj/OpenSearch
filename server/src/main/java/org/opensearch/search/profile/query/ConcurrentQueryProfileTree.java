@@ -27,22 +27,19 @@ import java.util.Map;
  */
 public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
 
-    private final Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics;
+    public Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfileTree(Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
-        this.pluginMetrics = pluginMetrics;
+    public ConcurrentQueryProfileTree() {
+        this(QueryProfileBreakdown.class);
+    }
+
+    public ConcurrentQueryProfileTree(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        this.breakdownClass = breakdownClass;
     }
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
-        for(QueryTimingType type : QueryTimingType.values()) {
-            metrics.put(type.toString(), Timer.class);
-        }
-        if (pluginMetrics.containsKey(query.getClass())) {
-            metrics.putAll(pluginMetrics.get(query.getClass()));
-        }
-        return new ConcurrentQueryProfileBreakdown(metrics);
+        return new ConcurrentQueryProfileBreakdown(breakdownClass);
     }
 
     @Override

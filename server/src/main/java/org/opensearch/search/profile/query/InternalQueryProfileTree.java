@@ -47,21 +47,8 @@ import java.util.Map;
  */
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
-    private final Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics;
-
-    public InternalQueryProfileTree(Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
-        this.pluginMetrics = pluginMetrics;
-    }
-
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
-        for(QueryTimingType type : QueryTimingType.values()) {
-            metrics.put(type.toString(), Timer.class);
-        }
-        if (pluginMetrics.containsKey(query.getClass())) {
-            metrics.putAll(pluginMetrics.get(query.getClass()));
-        }
-        return new QueryProfileBreakdown(metrics);
+        return new QueryProfileBreakdown();
     }
 }

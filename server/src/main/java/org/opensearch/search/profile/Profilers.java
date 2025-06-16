@@ -32,21 +32,15 @@
 
 package org.opensearch.search.profile;
 
-import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.internal.ContextIndexSearcher;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
 import org.opensearch.search.profile.aggregation.ConcurrentAggregationProfiler;
-import org.opensearch.search.profile.query.ConcurrentQueryProfileTree;
-import org.opensearch.search.profile.query.ConcurrentQueryProfiler;
-import org.opensearch.search.profile.query.InternalQueryProfileTree;
-import org.opensearch.search.profile.query.QueryProfiler;
+import org.opensearch.search.profile.query.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 
 /**
  * Wrapper around all the profilers that makes management easier.
@@ -60,26 +54,46 @@ public final class Profilers {
     private final List<QueryProfiler> queryProfilers;
     private final AggregationProfiler aggProfiler;
     private final boolean isConcurrentSegmentSearchEnabled;
-    private final Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics;
+    private final List<QueryProfiler> pluginProfilers;
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
-    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled, Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
+    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled) {
         this.searcher = searcher;
         this.isConcurrentSegmentSearchEnabled = isConcurrentSegmentSearchEnabled;
         this.queryProfilers = new ArrayList<>();
         this.aggProfiler = isConcurrentSegmentSearchEnabled ? new ConcurrentAggregationProfiler() : new AggregationProfiler();
-        this.pluginMetrics = pluginMetrics;
         addQueryProfiler();
+        this.pluginProfilers = new ArrayList<>();
+        this.searcher.setPluginProfilers(pluginProfilers);
     }
 
     /** Switch to a new profile. */
     public QueryProfiler addQueryProfiler() {
         QueryProfiler profiler = isConcurrentSegmentSearchEnabled
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(pluginMetrics), pluginMetrics)
-            : new QueryProfiler(new InternalQueryProfileTree(pluginMetrics));
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
+            : new QueryProfiler(new InternalQueryProfileTree());
         searcher.setQueryProfiler(profiler);
         queryProfilers.add(profiler);
         return profiler;
+    }
+
+    public void addPluginProfiler(Class<? extends QueryProfiler> pluginProfilerClass, Class<? extends InternalQueryProfileTree> treeClass, Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        try {
+            InternalQueryProfileTree tree = treeClass.getDeclaredConstructor().newInstance();
+            QueryProfiler pluginProfiler = pluginProfilerClass.getDeclaredConstructor(InternalQueryProfileTree.class).newInstance(tree);
+            if (isConcurrentSegmentSearchEnabled) {
+                pluginProfilers.add(new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(breakdownClass), breakdownClass));
+            }c
+            else {
+                pluginProfilers.add(pluginProfiler);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<QueryProfiler> getPluginProfilers() {
+        return Collections.unmodifiableList(pluginProfilers);
     }
 
     /** Get the current profiler. */

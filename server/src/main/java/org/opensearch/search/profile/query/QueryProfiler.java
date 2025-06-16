@@ -104,10 +104,6 @@ public class QueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdow
         return collector.getCollectorTree();
     }
 
-    public AbstractQueryProfileBreakdown getTopBreakdown() {
-        return profileTree.getStackTop();
-    }
-
     @Override
     public QueryProfileShardResult createProfileShardResult() {
         return new QueryProfileShardResult(getTree(), getRewriteTime() ,getCollector());

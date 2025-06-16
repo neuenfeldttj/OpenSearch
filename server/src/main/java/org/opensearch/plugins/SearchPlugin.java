@@ -70,8 +70,9 @@ import org.opensearch.search.fetch.FetchSubPhase;
 import org.opensearch.search.fetch.subphase.highlight.Highlighter;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.AbstractProfiler;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.query.InternalQueryProfileTree;
+import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.query.QueryPhaseSearcher;
 import org.opensearch.search.rescore.Rescorer;
 import org.opensearch.search.rescore.RescorerBuilder;
@@ -104,7 +105,7 @@ public interface SearchPlugin {
     /**
      * The plugin provider to be used to get the profilers from plugins.
      */
-    default PluginMetricsProvider getPluginMetricsProvider() {
+    default ProfilerProvider getProfilerProvider() {
         return null;
     }
 
@@ -242,12 +243,14 @@ public interface SearchPlugin {
     /**
      * Plugin Profiler provider
      */
-    interface PluginMetricsProvider {
+    interface ProfilerProvider {
         /**
          * Provides a profiler instance
          * @return profiler instance
          */
-        Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> getPluginMetrics();
+        Class<? extends QueryProfiler> getProfiler();
+        Class<? extends InternalQueryProfileTree> getProfileTree();
+        Class<? extends AbstractQueryProfileBreakdown> getProfileBreakdown();
     }
 
     /**
