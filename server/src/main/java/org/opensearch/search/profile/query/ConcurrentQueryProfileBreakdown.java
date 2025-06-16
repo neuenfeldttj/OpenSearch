@@ -100,7 +100,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             maxSliceNodeTime = 0L;
             minSliceNodeTime = 0L;
             avgSliceNodeTime = 0L;
-            Map<String, Long> queryBreakdownMap = new HashMap<>(breakdown.toBreakdownMap());
+            Map<String, Long> queryBreakdownMap = new TreeMap<>(breakdown.toBreakdownMap());
             queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT.toString(), createWeightTime);
             queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_COUNT_SUFFIX, 1L);
             return queryBreakdownMap;
@@ -118,7 +118,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
      * default breakdown map.
      */
     private Map<String, Long> buildDefaultQueryBreakdownMap(long createWeightTime) {
-        final Map<String, Long> concurrentQueryBreakdownMap = new HashMap<>();
+        final Map<String, Long> concurrentQueryBreakdownMap = new TreeMap<>();
         for (QueryTimingType timingType : QueryTimingType.values()) {
             final String timingTypeKey = timingType.toString();
             final String timingTypeCountKey = timingType + TIMING_TYPE_COUNT_SUFFIX;
@@ -309,7 +309,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             long createWeightTime,
             long createWeightStartTime
     ) {
-        final Map<String, Long> queryBreakdownMap = new HashMap<>();
+        final Map<String, Long> queryBreakdownMap = new TreeMap<>();
         long queryEndTime = Long.MIN_VALUE;
 
         // the create weight time is computed at the query level and is called only once per query

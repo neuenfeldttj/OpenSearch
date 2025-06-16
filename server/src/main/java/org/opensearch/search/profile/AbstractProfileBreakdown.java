@@ -34,6 +34,7 @@ package org.opensearch.search.profile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static java.util.Collections.emptyMap;
 
@@ -69,7 +70,7 @@ public abstract class AbstractProfileBreakdown {
      * Build a breakdown for current instance
      */
     public Map<String, Long> toBreakdownMap() {
-        Map<String, Long> map = new HashMap<>();
+        Map<String, Long> map = new TreeMap<>();
         for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
             map.putAll(entry.getValue().toBreakdownMap());
         }
