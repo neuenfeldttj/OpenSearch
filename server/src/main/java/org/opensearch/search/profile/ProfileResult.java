@@ -83,6 +83,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
     static final ParseField CHILDREN = new ParseField("children");
 
+    private final Object contextInstance;
     private final String type;
     private final String description;
     private final Map<String, Long> breakdown;
@@ -93,6 +94,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     private Long avgSliceNodeTime;
     private final List<ProfileResult> children;
 
+
     public ProfileResult(
         String type,
         String description,
@@ -101,10 +103,23 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         long nodeTime,
         List<ProfileResult> children
     ) {
-        this(type, description, breakdown, debug, nodeTime, children, null, null, null);
+        this(null, type, description, breakdown, debug, nodeTime, children, null, null, null);
     }
 
     public ProfileResult(
+        Object contextInstance,
+        String type,
+        String description,
+        Map<String, Long> breakdown,
+        Map<String, Object> debug,
+        long nodeTime,
+        List<ProfileResult> children
+    ) {
+        this(contextInstance, type, description, breakdown, debug, nodeTime, children, null, null, null);
+    }
+
+    public ProfileResult(
+        Object contextInstance,
         String type,
         String description,
         Map<String, Long> breakdown,
@@ -115,6 +130,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         Long minSliceNodeTime,
         Long avgSliceNodeTime
     ) {
+        this.contextInstance = contextInstance;
         this.type = type;
         this.description = description;
         this.breakdown = Objects.requireNonNull(breakdown, "required breakdown argument missing");
@@ -130,6 +146,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
      * Read from a stream.
      */
     public ProfileResult(StreamInput in) throws IOException {
+        this.contextInstance = in.readGenericValue();
         this.type = in.readString();
         this.description = in.readString();
         this.nodeTime = in.readLong();
@@ -180,7 +197,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
      * The timing breakdown for this node.
      */
     public Map<String, Long> getBreakdown() {
-        return Collections.unmodifiableMap(breakdown);
+        return breakdown;
     }
 
     /**
@@ -188,6 +205,10 @@ public final class ProfileResult implements Writeable, ToXContentObject {
      */
     public Map<String, Object> getDebugInfo() {
         return Collections.unmodifiableMap(debug);
+    }
+
+    public Object getContextInstance() {
+        return contextInstance;
     }
 
     /**

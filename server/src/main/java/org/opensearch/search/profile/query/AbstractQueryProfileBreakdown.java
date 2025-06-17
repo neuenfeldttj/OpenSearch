@@ -25,11 +25,21 @@ import java.util.Map;
  */
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
+    private Object contextInstance;
+
     public AbstractQueryProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
         super(metricClasses);
     }
 
     public abstract AbstractQueryProfileBreakdown context(Object context);
+
+    public void setContextInstance(Object contextInstance) {
+        this.contextInstance = contextInstance;
+    }
+
+    public Object getContextInstance() {
+        return contextInstance;
+    }
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}
 

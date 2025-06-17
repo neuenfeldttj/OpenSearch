@@ -38,6 +38,7 @@ import org.opensearch.core.common.io.stream.Writeable;
 import org.opensearch.core.xcontent.ToXContentFragment;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
+import org.opensearch.index.similarity.ScriptedSimilarity;
 import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.profile.aggregation.AggregationProfileShardResult;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
@@ -117,12 +118,6 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             for (QueryProfileShardResult result : profileShardResult.getQueryProfileResults()) {
                 result.toXContent(builder, params);
             }
-            builder.endArray();
-            builder.startArray(PLUGINS_FIELD);
-            for (AbstractProfileShardResult result : profileShardResult.getPluginProfileResults()) {
-                result.toXContent(builder, params);
-            }
-            builder.endArray();
             profileShardResult.getAggregationProfileResults().toXContent(builder, params);
             builder.endObject();
         }
@@ -155,7 +150,6 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         XContentParser.Token token = parser.currentToken();
         ensureExpectedToken(XContentParser.Token.START_OBJECT, token, parser);
         List<QueryProfileShardResult> queryProfileResults = new ArrayList<>();
-        List<AbstractProfileShardResult> pluginProfileResults = new ArrayList<>();
         AggregationProfileShardResult aggProfileShardResult = null;
         String id = null;
         String currentFieldName = null;
@@ -179,10 +173,6 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
                     while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
                         queryProfileResults.add(QueryProfileShardResult.fromXContent(parser));
                     }
-                } else if (PLUGINS_FIELD.equals(currentFieldName)) {
-                    while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
-                        pluginProfileResults.add(AbstractProfileShardResult.fromXContent(parser));
-                    }
                 } else if (AggregationProfileShardResult.AGGREGATIONS.equals(currentFieldName)) {
                     aggProfileShardResult = AggregationProfileShardResult.fromXContent(parser);
                 } else {
@@ -193,7 +183,7 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             }
         }
         NetworkTime networkTime = new NetworkTime(inboundNetworkTime, outboundNetworkTime);
-        searchProfileResults.put(id, new ProfileShardResult(queryProfileResults, aggProfileShardResult, pluginProfileResults, networkTime));
+        searchProfileResults.put(id, new ProfileShardResult(queryProfileResults, aggProfileShardResult, networkTime));
     }
 
     /**
@@ -210,21 +200,40 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
         List<QueryProfiler> pluginProfilers = profilers.getPluginProfilers();
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
-        List<AbstractProfileShardResult> pluginResults = new ArrayList<>(pluginProfilers.size());
+        List<QueryProfileShardResult> pluginResults = new ArrayList<>(pluginProfilers.size());
         for (QueryProfiler queryProfiler : queryProfilers) {
             QueryProfileShardResult result = queryProfiler.createProfileShardResult();
             queryResults.add(result);
         }
         AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
         for(QueryProfiler profiler : pluginProfilers) {
-            AbstractProfileShardResult result = profiler.createProfileShardResult();
+            QueryProfileShardResult result = profiler.createProfileShardResult();
             pluginResults.add(result);
         }
+        // TODO: combine the plugin profiler trees with the query profiler trees and only return this combined tree!
+        combineTrees(queryResults, pluginResults);
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {
             networkTime.setInboundNetworkTime(request.getInboundNetworkTime());
             networkTime.setOutboundNetworkTime(request.getOutboundNetworkTime());
         }
-        return new ProfileShardResult(queryResults, aggResults, pluginResults, networkTime);
+        return new ProfileShardResult(queryResults, aggResults, networkTime);
+    }
+
+    private static void combineTrees(List<QueryProfileShardResult> queryResults, List<QueryProfileShardResult> pluginResults) {
+        for(QueryProfileShardResult queryResult : queryResults) {
+            List<ProfileResult> queryProfileResults = queryResult.getProfileResults();
+            for(ProfileResult queryProfileResult : queryProfileResults) {
+                for (QueryProfileShardResult pluginResult : pluginResults) {
+                    List<ProfileResult> pluginProfileResults = pluginResult.getProfileResults();
+                    for(ProfileResult pluginProfileResult : pluginProfileResults) {
+                        if(pluginProfileResult.getContextInstance().equals(queryProfileResult.getContextInstance())) {
+                            // combine the plugin breakdown info into the query breakdown info
+                            queryProfileResult.getBreakdown().putAll(pluginProfileResult.getBreakdown());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

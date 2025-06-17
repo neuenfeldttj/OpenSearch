@@ -144,6 +144,7 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
         }
 
         ProfileResult reducedResult = new ProfileResult(
+            null,
             type,
             description,
             breakdown,

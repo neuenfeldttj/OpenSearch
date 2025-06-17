@@ -39,6 +39,7 @@ import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +49,19 @@ import java.util.Map;
  */
 @PublicApi(since="3.0.0")
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
+
+    @Override
+    protected ProfileResult createProfileResult(String type, String description, AbstractQueryProfileBreakdown breakdown, List<ProfileResult> childrenProfileResults) {
+        return new ProfileResult(
+            breakdown.getContextInstance(),
+            type,
+            description,
+            breakdown.toBreakdownMap(),
+            breakdown.toDebugMap(),
+            breakdown.toNodeTime(),
+            childrenProfileResults
+        );
+    }
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {

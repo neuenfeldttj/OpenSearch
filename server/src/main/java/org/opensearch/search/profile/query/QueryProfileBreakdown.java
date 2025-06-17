@@ -55,6 +55,7 @@ public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
     @Override
     public AbstractQueryProfileBreakdown context(Object context) {
+        setContextInstance(context);
         return this;
     }
 }

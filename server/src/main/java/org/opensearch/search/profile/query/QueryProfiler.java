@@ -106,6 +106,6 @@ public class QueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdow
 
     @Override
     public QueryProfileShardResult createProfileShardResult() {
-        return new QueryProfileShardResult(getTree(), getRewriteTime() ,getCollector());
+        return new QueryProfileShardResult(getTree(), getRewriteTime(), getCollector());
     }
 }

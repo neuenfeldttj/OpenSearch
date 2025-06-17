@@ -346,6 +346,7 @@ public class QueryPhase {
         if (searchContext.getProfilers() != null) {
             InternalProfileCollector profileCollector = QueryCollectorContext.createQueryCollectorWithProfiler(collectors);
             searchContext.getProfilers().getCurrentQueryProfiler().setCollector(profileCollector);
+            searchContext.getProfilers().getPluginProfilers().forEach(p -> p.setCollector(profileCollector));
             queryCollector = profileCollector;
         } else {
             queryCollector = QueryCollectorContext.createQueryCollector(collectors);

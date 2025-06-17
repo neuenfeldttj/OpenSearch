@@ -55,7 +55,7 @@ public abstract class AbstractProfileBreakdown {
         Map<String, Metric> metrics = new HashMap<>();
         for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
             try {
-                metrics.put(entry.getKey(), entry.getValue().getDeclaredConstructor().newInstance());
+                metrics.put(entry.getKey(), entry.getValue().getDeclaredConstructor(String.class).newInstance(entry.getKey()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
