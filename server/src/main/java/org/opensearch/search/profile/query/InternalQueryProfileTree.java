@@ -49,6 +49,10 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        return new QueryProfileBreakdown();
+        Map<String, Class<? extends Metric>> metricClasses = new HashMap<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metricClasses.put(type.toString(), Timer.class);
+        }
+        return new QueryProfileBreakdown(metricClasses);
     }
 }

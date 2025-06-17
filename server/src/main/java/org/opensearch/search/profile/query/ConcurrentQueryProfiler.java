@@ -36,10 +36,6 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
 
     private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree) {
-        this(profileTree, QueryProfileBreakdown.class);
-    }
-
     public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
         super(profileTree);
         long threadId = getCurrentThreadId();

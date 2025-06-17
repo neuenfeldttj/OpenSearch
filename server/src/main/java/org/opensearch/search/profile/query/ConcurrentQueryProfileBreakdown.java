@@ -50,7 +50,11 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
 
     private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
+    private Set<String> timingMetrics;
+    private Set<String> nonTimingMetrics;
+
     public ConcurrentQueryProfileBreakdown(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        super(null);
         this.breakdownClass = breakdownClass;
     }
 
@@ -166,6 +170,9 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             // max slice end time across all timing types
             long sliceMaxEndTime = Long.MIN_VALUE;
             long sliceMinStartTime = Long.MAX_VALUE;
+
+            timingMetrics = getMetrics(slice.getValue(), true);
+            nonTimingMetrics = getMetrics(slice.getValue(), false);
 
             for (String timingType : timingMetrics) {
                 if (timingType.equals(QueryTimingType.CREATE_WEIGHT.toString())) {
@@ -318,7 +325,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
         queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT + TIMING_TYPE_COUNT_SUFFIX, 1L);
         queryBreakdownMap.put(QueryTimingType.CREATE_WEIGHT.toString(), createWeightTime);
 
-        for(String metric : get) {
+        for(String metric : timingMetrics) {
 
             if(metric.equals(QueryTimingType.CREATE_WEIGHT.toString())) {
                 // create weight time is computed at query level and is called only once per query
@@ -419,6 +426,43 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             avgKey,
             (key, value) -> (value == null) ? sliceValue : (value + sliceValue)
         );
+    }
+
+//    private Set<String> getTimingMetrics() {
+//        Set<String> timingMetrics = new HashSet<>();
+//        for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
+//            if(entry.getValue().equals(Timer.class)) {
+//                timingMetrics.add(entry.getKey());
+//            }
+//        }
+//        return timingMetrics;
+//    }
+//
+//    private Set<String> getNonTimingMetrics() {
+//        Set<String> nonTimingMetrics = new HashSet<>();
+//        for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
+//            if(!entry.getValue().equals(Timer.class)) {
+//                nonTimingMetrics.add(entry.getKey());
+//            }
+//        }
+//        return nonTimingMetrics;
+//    }
+
+    private Set<String> getMetrics(List<LeafReaderContext> sliceContexts, boolean timing) {
+        Set<String> metrics = new HashSet<>();
+        for(LeafReaderContext sliceContext : sliceContexts) {
+            if(!contexts.containsKey(sliceContext)) continue;
+            Map<String, Metric> breakdownMetrics = contexts.get(sliceContext).getMetrics();
+            for(Map.Entry<String, Metric> entry : breakdownMetrics.entrySet()) {
+                if(timing && entry.getValue().getClass().equals(Timer.class)) {
+                    metrics.add(entry.getKey());
+                }
+                else if(!timing && !entry.getValue().getClass().equals(Timer.class)) {
+                    metrics.add(entry.getKey());
+                }
+            }
+        }
+        return metrics;
     }
 
     @Override

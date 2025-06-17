@@ -38,9 +38,7 @@ import org.opensearch.search.profile.aggregation.AggregationProfiler;
 import org.opensearch.search.profile.aggregation.ConcurrentAggregationProfiler;
 import org.opensearch.search.profile.query.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Wrapper around all the profilers that makes management easier.
@@ -83,7 +81,7 @@ public final class Profilers {
             QueryProfiler pluginProfiler = pluginProfilerClass.getDeclaredConstructor(InternalQueryProfileTree.class).newInstance(tree);
             if (isConcurrentSegmentSearchEnabled) {
                 pluginProfilers.add(new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(breakdownClass), breakdownClass));
-            }c
+            }
             else {
                 pluginProfilers.add(pluginProfiler);
             }

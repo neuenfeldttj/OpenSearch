@@ -166,7 +166,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
 
     public void testBasic() throws IOException {
         QueryProfiler profiler = executor != null
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree())
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
             : new QueryProfiler(new InternalQueryProfileTree());
         searcher.setQueryProfiler(profiler);
         Query query = new TermQuery(new Term("foo", "bar"));
@@ -235,7 +235,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
 
     public void testNoScoring() throws IOException {
         QueryProfiler profiler = executor != null
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree())
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
             : new QueryProfiler(new InternalQueryProfileTree());
         searcher.setQueryProfiler(profiler);
         Query query = new TermQuery(new Term("foo", "bar"));
@@ -304,7 +304,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
 
     public void testUseIndexStats() throws IOException {
         QueryProfiler profiler = executor != null
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree())
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
             : new QueryProfiler(new InternalQueryProfileTree());
         searcher.setQueryProfiler(profiler);
         Query query = new TermQuery(new Term("foo", "bar"));
@@ -320,7 +320,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
 
     public void testApproximations() throws IOException {
         QueryProfiler profiler = executor != null
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree())
+            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
             : new QueryProfiler(new InternalQueryProfileTree());
         searcher.setQueryProfiler(profiler);
         Query query = new RandomApproximationQuery(new TermQuery(new Term("foo", "bar")), random());

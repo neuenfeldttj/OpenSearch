@@ -40,9 +40,13 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Weight;
+import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.Timer;
 import org.opensearch.test.OpenSearchTestCase;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileScorerTests extends OpenSearchTestCase {
 
@@ -84,7 +88,11 @@ public class ProfileScorerTests extends OpenSearchTestCase {
         Query query = new MatchAllDocsQuery();
         Weight weight = query.createWeight(new IndexSearcher(new MultiReader()), ScoreMode.TOP_SCORES, 1f);
         FakeScorer fakeScorer = new FakeScorer(weight);
-        QueryProfileBreakdown profile = new QueryProfileBreakdown();
+        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metrics.put(type.toString(), Timer.class);
+        }
+        QueryProfileBreakdown profile = new QueryProfileBreakdown(metrics);
         ProfileScorer profileScorer = new ProfileScorer(fakeScorer, profile);
         profileScorer.setMinCompetitiveScore(0.42f);
         assertEquals(0.42f, fakeScorer.minCompetitiveScore, 0f);
@@ -94,7 +102,11 @@ public class ProfileScorerTests extends OpenSearchTestCase {
         Query query = new MatchAllDocsQuery();
         Weight weight = query.createWeight(new IndexSearcher(new MultiReader()), ScoreMode.TOP_SCORES, 1f);
         FakeScorer fakeScorer = new FakeScorer(weight);
-        QueryProfileBreakdown profile = new QueryProfileBreakdown();
+        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metrics.put(type.toString(), Timer.class);
+        }
+        QueryProfileBreakdown profile = new QueryProfileBreakdown(metrics);
         ProfileScorer profileScorer = new ProfileScorer(fakeScorer, profile);
         profileScorer.setMinCompetitiveScore(0.42f);
         fakeScorer.maxScore = 42f;

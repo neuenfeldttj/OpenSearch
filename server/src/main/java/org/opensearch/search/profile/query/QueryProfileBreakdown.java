@@ -49,12 +49,8 @@ import java.util.Set;
  */
 public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
-    public QueryProfileBreakdown() {
-        Map<String, Metric> metrics = new HashMap<>();
-        for(QueryTimingType type : QueryTimingType.values()) {
-            metrics.put(type.toString(), new Timer(type.toString()));
-        }
-        setMetrics(metrics);
+    public QueryProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
+        super(metricClasses);
     }
 
     @Override

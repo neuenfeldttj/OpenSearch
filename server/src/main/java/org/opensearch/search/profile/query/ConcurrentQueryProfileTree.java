@@ -29,10 +29,6 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
 
     public Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfileTree() {
-        this(QueryProfileBreakdown.class);
-    }
-
     public ConcurrentQueryProfileTree(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
         this.breakdownClass = breakdownClass;
     }
