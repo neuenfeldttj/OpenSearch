@@ -161,7 +161,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         this.pluginProfilers = pluginProfilers;
     }
 
-    public QueryProfiler getPluginProfiler(Class<? extends Class<? extends QueryProfiler>> clazz) {
+    public QueryProfiler getPluginProfiler(Class<? extends QueryProfiler> clazz) {
         for (QueryProfiler profiler : pluginProfilers) {
             if (profiler.getClass().equals(clazz)) {
                 return profiler;

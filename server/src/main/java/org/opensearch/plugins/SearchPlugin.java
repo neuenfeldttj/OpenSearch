@@ -68,6 +68,7 @@ import org.opensearch.search.aggregations.support.ValuesSourceRegistry;
 import org.opensearch.search.deciders.ConcurrentSearchRequestDecider;
 import org.opensearch.search.fetch.FetchSubPhase;
 import org.opensearch.search.fetch.subphase.highlight.Highlighter;
+import org.opensearch.search.internal.SearchContext;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
@@ -245,12 +246,10 @@ public interface SearchPlugin {
      */
     interface ProfilerProvider {
         /**
-         * Provides a profiler instance
+         * Provides a plugin profiler instance
          * @return profiler instance
          */
-        Class<? extends QueryProfiler> getProfiler();
-        Class<? extends InternalQueryProfileTree> getProfileTree();
-        Class<? extends AbstractQueryProfileBreakdown> getProfileBreakdown();
+        QueryProfiler getPluginProfiler(SearchContext context);
     }
 
     /**

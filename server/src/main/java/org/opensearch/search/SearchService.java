@@ -1569,10 +1569,8 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         if (source.profile()) {
             Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch());
             for(SearchPlugin.ProfilerProvider p : pluginProfilers) {
-                Class<? extends QueryProfiler> profiler = p.getProfiler();
-                Class<? extends InternalQueryProfileTree> tree = p.getProfileTree();
-                Class<? extends AbstractQueryProfileBreakdown> breakdown = p.getProfileBreakdown();
-                profilers.addPluginProfiler(profiler, tree, breakdown);
+                QueryProfiler profiler = p.getPluginProfiler(context);
+                if(profiler != null) profilers.addPluginProfiler(profiler);
             }
             context.setProfilers(profilers);
         }

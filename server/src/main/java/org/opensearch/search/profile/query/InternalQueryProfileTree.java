@@ -33,6 +33,7 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
+import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
@@ -45,6 +46,7 @@ import java.util.Map;
  *
  * @opensearch.internal
  */
+@PublicApi(since="3.0.0")
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
     @Override

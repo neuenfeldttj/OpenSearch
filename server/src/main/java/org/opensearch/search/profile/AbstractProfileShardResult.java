@@ -28,6 +28,7 @@ import static org.opensearch.core.xcontent.XContentParserUtils.ensureExpectedTok
  *
  * @opensearch.internal
  */
+@PublicApi(since = "3.0.0")
 public class AbstractProfileShardResult implements Writeable, ToXContentObject {
 
     protected final List<ProfileResult> profileResults;

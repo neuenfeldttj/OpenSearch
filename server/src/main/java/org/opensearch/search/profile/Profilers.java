@@ -75,19 +75,9 @@ public final class Profilers {
         return profiler;
     }
 
-    public void addPluginProfiler(Class<? extends QueryProfiler> pluginProfilerClass, Class<? extends InternalQueryProfileTree> treeClass, Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
-        try {
-            InternalQueryProfileTree tree = treeClass.getDeclaredConstructor().newInstance();
-            QueryProfiler pluginProfiler = pluginProfilerClass.getDeclaredConstructor(InternalQueryProfileTree.class).newInstance(tree);
-            if (isConcurrentSegmentSearchEnabled) {
-                pluginProfilers.add(new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(breakdownClass), breakdownClass));
-            }
-            else {
-                pluginProfilers.add(pluginProfiler);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void addPluginProfiler(QueryProfiler pluginProfiler) {
+        // TODO: need to think about concurrency!
+        pluginProfilers.add(pluginProfiler);
     }
 
     public List<QueryProfiler> getPluginProfilers() {

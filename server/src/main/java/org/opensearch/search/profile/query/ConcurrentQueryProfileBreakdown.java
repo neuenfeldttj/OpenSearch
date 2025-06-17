@@ -54,7 +54,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     private Set<String> nonTimingMetrics;
 
     public ConcurrentQueryProfileBreakdown(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
-        super(null);
+        super(Map.of());
         this.breakdownClass = breakdownClass;
     }
 
