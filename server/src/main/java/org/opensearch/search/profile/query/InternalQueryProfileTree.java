@@ -53,10 +53,10 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
     @Override
     protected ProfileResult createProfileResult(String type, String description, AbstractQueryProfileBreakdown breakdown, List<ProfileResult> childrenProfileResults) {
         return new ProfileResult(
-            breakdown.getContextInstance(),
             type,
             description,
             breakdown.toBreakdownMap(),
+            breakdown.getContextInstance().toString(),
             breakdown.toDebugMap(),
             breakdown.toNodeTime(),
             childrenProfileResults

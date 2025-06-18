@@ -83,7 +83,9 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
     static final ParseField CHILDREN = new ParseField("children");
 
-    private final Object contextInstance;
+    static final ParseField CONTEXT = new ParseField("context");
+
+    private final String contextInstance;
     private final String type;
     private final String description;
     private final Map<String, Long> breakdown;
@@ -94,35 +96,23 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     private Long avgSliceNodeTime;
     private final List<ProfileResult> children;
 
-
     public ProfileResult(
         String type,
         String description,
         Map<String, Long> breakdown,
+        String contextInstance,
         Map<String, Object> debug,
         long nodeTime,
         List<ProfileResult> children
     ) {
-        this(null, type, description, breakdown, debug, nodeTime, children, null, null, null);
+        this(type, description, breakdown, contextInstance, debug, nodeTime, children, null, null, null);
     }
 
     public ProfileResult(
-        Object contextInstance,
         String type,
         String description,
         Map<String, Long> breakdown,
-        Map<String, Object> debug,
-        long nodeTime,
-        List<ProfileResult> children
-    ) {
-        this(contextInstance, type, description, breakdown, debug, nodeTime, children, null, null, null);
-    }
-
-    public ProfileResult(
-        Object contextInstance,
-        String type,
-        String description,
-        Map<String, Long> breakdown,
+        String contextInstance,
         Map<String, Object> debug,
         long nodeTime,
         List<ProfileResult> children,
@@ -130,10 +120,10 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         Long minSliceNodeTime,
         Long avgSliceNodeTime
     ) {
-        this.contextInstance = contextInstance;
         this.type = type;
         this.description = description;
         this.breakdown = Objects.requireNonNull(breakdown, "required breakdown argument missing");
+        this.contextInstance = contextInstance;
         this.debug = debug == null ? Map.of() : debug;
         this.children = children == null ? List.of() : children;
         this.nodeTime = nodeTime;
@@ -146,11 +136,11 @@ public final class ProfileResult implements Writeable, ToXContentObject {
      * Read from a stream.
      */
     public ProfileResult(StreamInput in) throws IOException {
-        this.contextInstance = in.readGenericValue();
         this.type = in.readString();
         this.description = in.readString();
         this.nodeTime = in.readLong();
         breakdown = in.readMap(StreamInput::readString, StreamInput::readLong);
+        contextInstance = in.readString();
         debug = in.readMap(StreamInput::readString, StreamInput::readGenericValue);
         children = in.readList(ProfileResult::new);
         if (in.getVersion().onOrAfter(Version.V_2_10_0)) {
@@ -207,7 +197,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         return Collections.unmodifiableMap(debug);
     }
 
-    public Object getContextInstance() {
+    public String getContextInstance() {
         return contextInstance;
     }
 
@@ -308,6 +298,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         parser.declareString(constructorArg(), TYPE);
         parser.declareString(constructorArg(), DESCRIPTION);
         parser.declareObject(constructorArg(), (p, c) -> p.map(), BREAKDOWN);
+        parser.declareString(optionalConstructorArg(), CONTEXT);
         parser.declareObject(optionalConstructorArg(), (p, c) -> p.map(), DEBUG);
         parser.declareLong(constructorArg(), NODE_TIME_RAW);
         parser.declareObjectArray(optionalConstructorArg(), (p, c) -> fromXContent(p), CHILDREN);

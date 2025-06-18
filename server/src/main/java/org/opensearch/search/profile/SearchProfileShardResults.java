@@ -118,6 +118,7 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             for (QueryProfileShardResult result : profileShardResult.getQueryProfileResults()) {
                 result.toXContent(builder, params);
             }
+            builder.endArray();
             profileShardResult.getAggregationProfileResults().toXContent(builder, params);
             builder.endObject();
         }
@@ -210,7 +211,6 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             QueryProfileShardResult result = profiler.createProfileShardResult();
             pluginResults.add(result);
         }
-        // TODO: combine the plugin profiler trees with the query profiler trees and only return this combined tree!
         combineTrees(queryResults, pluginResults);
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {

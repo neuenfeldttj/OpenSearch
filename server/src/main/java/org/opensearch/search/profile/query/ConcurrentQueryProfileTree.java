@@ -48,10 +48,10 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
         assert breakdown instanceof ConcurrentQueryProfileBreakdown;
         final ConcurrentQueryProfileBreakdown concurrentBreakdown = (ConcurrentQueryProfileBreakdown) breakdown;
         return new ProfileResult(
-            concurrentBreakdown.getContextInstance(),
             type,
             description,
             concurrentBreakdown.toBreakdownMap(),
+            concurrentBreakdown.getContextInstance().toString(),
             concurrentBreakdown.toDebugMap(),
             concurrentBreakdown.toNodeTime(),
             childrenProfileResults,
