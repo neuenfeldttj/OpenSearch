@@ -72,12 +72,6 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
             return profile;
         }
 
-
-        //TODO: need to fix for concurrency!
-//        Profilers.contextToBreakdowns.computeIfAbsent(context.toString(), k -> new HashSet<>());
-//        Profilers.contextToBreakdowns.get(context.toString()).add(this);
-        setContextInstance(context);
-
         return contexts.computeIfAbsent(context, ctx -> {
             try {
                 return breakdownClass.getDeclaredConstructor().newInstance();

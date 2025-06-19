@@ -56,9 +56,6 @@ public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
     @Override
     public AbstractQueryProfileBreakdown context(Object context) {
-        Profilers.contextToBreakdowns.computeIfAbsent(context.toString(), k -> new HashSet<>());
-        Profilers.contextToBreakdowns.get(context.toString()).add(this);
-        setContextInstance(context);
         return this;
     }
 }

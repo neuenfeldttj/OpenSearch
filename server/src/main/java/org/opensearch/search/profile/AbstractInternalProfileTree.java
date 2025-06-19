@@ -188,7 +188,7 @@ public abstract class AbstractInternalProfileTree<PB extends AbstractProfileBrea
             type,
             description,
             breakdown.toBreakdownMap(),
-            "",
+            null,
             breakdown.toDebugMap(),
             breakdown.toNodeTime(),
             childrenProfileResults

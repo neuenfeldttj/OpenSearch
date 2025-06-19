@@ -36,10 +36,12 @@ import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
+import org.opensearch.search.profile.Profilers;
 import org.opensearch.search.profile.Timer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +64,7 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
             type,
             description,
             breakdown.toBreakdownMap(),
-            breakdown.getContextInstance(),
+            breakdown.getQuery(),
             breakdown.toDebugMap(),
             breakdown.toNodeTime(),
             childrenProfileResults
@@ -72,7 +74,12 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
         try {
-            return breakdownClass.getDeclaredConstructor().newInstance();
+            AbstractQueryProfileBreakdown breakdown = breakdownClass.getDeclaredConstructor().newInstance();
+            if(!breakdownClass.equals(QueryProfileBreakdown.class)) {
+                Profilers.queriesToBreakdowns.computeIfAbsent(query, q -> new HashSet<>()).add(breakdown);
+            }
+            breakdown.setQuery(query);
+            return breakdown;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

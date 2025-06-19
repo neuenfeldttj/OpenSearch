@@ -147,7 +147,7 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
             type,
             description,
             breakdown,
-            "",
+            null,
             debug,
             nodeTime,
             reducedChildrenTree,

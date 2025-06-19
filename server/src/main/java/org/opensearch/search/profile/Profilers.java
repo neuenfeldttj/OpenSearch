@@ -32,6 +32,7 @@
 
 package org.opensearch.search.profile;
 
+import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.internal.ContextIndexSearcher;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
@@ -54,7 +55,7 @@ public final class Profilers {
     private final boolean isConcurrentSegmentSearchEnabled;
     private final List<AbstractQueryProfiler> pluginProfilers;
 
-    public static Map<Object, Set<AbstractQueryProfileBreakdown>> contextToBreakdowns = new HashMap<>();
+    public static Map<Query, Set<AbstractQueryProfileBreakdown>> queriesToBreakdowns = new HashMap<>();
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
     public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled) {

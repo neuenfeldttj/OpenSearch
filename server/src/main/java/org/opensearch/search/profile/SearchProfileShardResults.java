@@ -197,11 +197,10 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
     public static ProfileShardResult buildShardResults(Profilers profilers, ShardSearchRequest request) {
         List<AbstractQueryProfiler> queryProfilers = profilers.getQueryProfilers();
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
-        List<AbstractQueryProfiler> pluginProfilers = profilers.getPluginProfilers();
-        combineTrees(queryProfilers, pluginProfilers);
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
         for (AbstractQueryProfiler queryProfiler : queryProfilers) {
             QueryProfileShardResult result = queryProfiler.createProfileShardResult();
+            combineTrees(result.getProfileResults());
             queryResults.add(result);
         }
         AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
@@ -213,20 +212,15 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         return new ProfileShardResult(queryResults, aggResults, networkTime);
     }
 
-    private static void combineTrees(List<AbstractQueryProfiler> queryResults, List<AbstractQueryProfiler> pluginResults) {
-        for(AbstractQueryProfiler queryResult : queryResults) {
-            List<ProfileResult> queryProfileResults = queryResult.getTree();
-            for(ProfileResult queryProfileResult : queryProfileResults) {
-                for (AbstractQueryProfiler pluginResult : pluginResults) {
-                    List<ProfileResult> pluginProfileResults = pluginResult.getTree();
-                    for(ProfileResult pluginProfileResult : pluginProfileResults) {
-                        if(pluginProfileResult.getContextInstance().equals(queryProfileResult.getContextInstance())) {
-                            // combine the plugin breakdown info into the query breakdown info
-                            queryProfileResult.getBreakdown().putAll(pluginProfileResult.getBreakdown());
-                        }
-                    }
+    private static void combineTrees(List<ProfileResult> queryResults) {
+        for(ProfileResult queryResult : queryResults) {
+            //check if query matches anything in the map of queriesToBreakdowns. If so, add them
+            if(Profilers.queriesToBreakdowns.containsKey(queryResult.getQuery())) {
+                for(AbstractQueryProfileBreakdown breakdown: Profilers.queriesToBreakdowns.get(queryResult.getQuery())) {
+                    queryResult.getBreakdown().putAll(breakdown.toBreakdownMap());
                 }
             }
+            combineTrees(queryResult.getProfiledChildren());
         }
     }
 

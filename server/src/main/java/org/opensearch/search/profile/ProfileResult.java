@@ -32,6 +32,7 @@
 
 package org.opensearch.search.profile;
 
+import org.apache.lucene.search.Query;
 import org.opensearch.Version;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.common.unit.TimeValue;
@@ -83,9 +84,9 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     static final ParseField AVG_SLICE_NODE_TIME_RAW = new ParseField("avg_slice_time_in_nanos");
     static final ParseField CHILDREN = new ParseField("children");
 
-    static final ParseField CONTEXT = new ParseField("context");
+    static final ParseField QUERY = new ParseField("query");
 
-    private final String contextInstance;
+    private final Query query;
     private final String type;
     private final String description;
     private final Map<String, Long> breakdown;
@@ -100,19 +101,19 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         String type,
         String description,
         Map<String, Long> breakdown,
-        String contextInstance,
+        Query query,
         Map<String, Object> debug,
         long nodeTime,
         List<ProfileResult> children
     ) {
-        this(type, description, breakdown, contextInstance, debug, nodeTime, children, null, null, null);
+        this(type, description, breakdown, query, debug, nodeTime, children, null, null, null);
     }
 
     public ProfileResult(
         String type,
         String description,
         Map<String, Long> breakdown,
-        String contextInstance,
+        Query query,
         Map<String, Object> debug,
         long nodeTime,
         List<ProfileResult> children,
@@ -123,7 +124,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         this.type = type;
         this.description = description;
         this.breakdown = Objects.requireNonNull(breakdown, "required breakdown argument missing");
-        this.contextInstance = contextInstance;
+        this.query = query;
         this.debug = debug == null ? Map.of() : debug;
         this.children = children == null ? List.of() : children;
         this.nodeTime = nodeTime;
@@ -140,7 +141,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         this.description = in.readString();
         this.nodeTime = in.readLong();
         breakdown = in.readMap(StreamInput::readString, StreamInput::readLong);
-        contextInstance = in.readString();
+        query = (Query) in.readGenericValue();
         debug = in.readMap(StreamInput::readString, StreamInput::readGenericValue);
         children = in.readList(ProfileResult::new);
         if (in.getVersion().onOrAfter(Version.V_2_10_0)) {
@@ -197,8 +198,8 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         return Collections.unmodifiableMap(debug);
     }
 
-    public String getContextInstance() {
-        return contextInstance;
+    public Query getQuery() {
+        return query;
     }
 
     /**
@@ -298,7 +299,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
         parser.declareString(constructorArg(), TYPE);
         parser.declareString(constructorArg(), DESCRIPTION);
         parser.declareObject(constructorArg(), (p, c) -> p.map(), BREAKDOWN);
-        parser.declareString(optionalConstructorArg(), CONTEXT);
+        parser.declareString(optionalConstructorArg(), QUERY);
         parser.declareObject(optionalConstructorArg(), (p, c) -> p.map(), DEBUG);
         parser.declareLong(constructorArg(), NODE_TIME_RAW);
         parser.declareObjectArray(optionalConstructorArg(), (p, c) -> fromXContent(p), CHILDREN);

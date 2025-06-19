@@ -11,12 +11,10 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
-import org.opensearch.search.profile.ProfileResult;
-import org.opensearch.search.profile.Timer;
+import org.opensearch.search.profile.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +33,12 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        return new ConcurrentQueryProfileBreakdown(breakdownClass);
+        AbstractQueryProfileBreakdown breakdown = new ConcurrentQueryProfileBreakdown(breakdownClass);
+        breakdown.setQuery(query);
+        if(!breakdownClass.equals(QueryProfileBreakdown.class)) {
+            Profilers.queriesToBreakdowns.computeIfAbsent(query, q -> new HashSet<>()).add(breakdown);
+        }
+        return breakdown;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
             type,
             description,
             concurrentBreakdown.toBreakdownMap(),
-            concurrentBreakdown.getContextInstance(),
+            concurrentBreakdown.getQuery(),
             concurrentBreakdown.toDebugMap(),
             concurrentBreakdown.toNodeTime(),
             childrenProfileResults,

@@ -10,6 +10,7 @@ package org.opensearch.search.profile.query;
 
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
+import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
@@ -26,17 +27,16 @@ import java.util.Map;
 @PublicApi(since = "3.0.0")
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
-    private Object contextInstance;
+    private Query query;
 
     public abstract AbstractQueryProfileBreakdown context(Object context);
 
-    public void setContextInstance(Object contextInstance) {
-        this.contextInstance = contextInstance;
+    public void setQuery(Query query) {
+        this.query = query;
     }
 
-    public String getContextInstance() {
-        if(contextInstance == null) return "";
-        return contextInstance.toString();
+    public Query getQuery() {
+        return query;
     }
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}
