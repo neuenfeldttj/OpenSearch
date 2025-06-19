@@ -49,10 +49,12 @@ import java.util.*;
 public final class Profilers {
 
     private final ContextIndexSearcher searcher;
-    private final List<QueryProfiler> queryProfilers;
+    private final List<AbstractQueryProfiler> queryProfilers;
     private final AggregationProfiler aggProfiler;
     private final boolean isConcurrentSegmentSearchEnabled;
-    private final List<QueryProfiler> pluginProfilers;
+    private final List<AbstractQueryProfiler> pluginProfilers;
+
+    public static Map<Object, Set<AbstractQueryProfileBreakdown>> contextToBreakdowns = new HashMap<>();
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
     public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled) {
@@ -66,31 +68,30 @@ public final class Profilers {
     }
 
     /** Switch to a new profile. */
-    public QueryProfiler addQueryProfiler() {
-        QueryProfiler profiler = isConcurrentSegmentSearchEnabled
-            ? new ConcurrentQueryProfiler(new ConcurrentQueryProfileTree(QueryProfileBreakdown.class), QueryProfileBreakdown.class)
-            : new QueryProfiler(new InternalQueryProfileTree());
+    public AbstractQueryProfiler addQueryProfiler() {
+        AbstractQueryProfiler profiler = isConcurrentSegmentSearchEnabled
+            ? new ConcurrentQueryProfiler(QueryProfileBreakdown.class)
+            : new QueryProfiler(QueryProfileBreakdown.class);
         searcher.setQueryProfiler(profiler);
         queryProfilers.add(profiler);
         return profiler;
     }
 
-    public void addPluginProfiler(QueryProfiler pluginProfiler) {
-        // TODO: need to think about concurrency!
+    public void addPluginProfiler(AbstractQueryProfiler pluginProfiler) {
         pluginProfilers.add(pluginProfiler);
     }
 
-    public List<QueryProfiler> getPluginProfilers() {
+    public List<AbstractQueryProfiler> getPluginProfilers() {
         return Collections.unmodifiableList(pluginProfilers);
     }
 
     /** Get the current profiler. */
-    public QueryProfiler getCurrentQueryProfiler() {
+    public AbstractQueryProfiler getCurrentQueryProfiler() {
         return queryProfilers.getLast();
     }
 
     /** Return the list of all created {@link QueryProfiler}s so far. */
-    public List<QueryProfiler> getQueryProfilers() {
+    public List<AbstractQueryProfiler> getQueryProfilers() {
         return Collections.unmodifiableList(queryProfilers);
     }
 

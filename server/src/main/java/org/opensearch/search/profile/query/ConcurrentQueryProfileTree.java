@@ -51,7 +51,7 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
             type,
             description,
             concurrentBreakdown.toBreakdownMap(),
-            concurrentBreakdown.getContextInstance().toString(),
+            concurrentBreakdown.getContextInstance(),
             concurrentBreakdown.toDebugMap(),
             concurrentBreakdown.toNodeTime(),
             childrenProfileResults,

@@ -79,6 +79,7 @@ public class ConcurrentQueryPhaseSearcher extends DefaultQueryPhaseSearcher {
             final ProfileCollectorManager<? extends Collector, ReduceableSearchResult> profileCollectorManager =
                 QueryCollectorManagerContext.createQueryCollectorManagerWithProfiler(collectorContexts);
             searchContext.getProfilers().getCurrentQueryProfiler().setCollector(profileCollectorManager);
+            searchContext.getProfilers().getPluginProfilers().forEach(p -> p.setCollector(profileCollectorManager));
             collectorManager = profileCollectorManager;
         } else {
             // Create collector manager tree

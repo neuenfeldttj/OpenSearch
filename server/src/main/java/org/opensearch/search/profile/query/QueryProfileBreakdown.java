@@ -32,13 +32,10 @@
 
 package org.opensearch.search.profile.query;
 
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.*;
 import org.opensearch.search.profile.Timer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A record of timings for the various operations that may happen during query execution.
@@ -49,12 +46,18 @@ import java.util.Set;
  */
 public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
 
-    public QueryProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
-        super(metricClasses);
+    public QueryProfileBreakdown() {
+        Map<String, Metric> metrics = new HashMap<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metrics.put(type.toString(), new Timer(type.toString()));
+        }
+        setMetrics(metrics);
     }
 
     @Override
     public AbstractQueryProfileBreakdown context(Object context) {
+        Profilers.contextToBreakdowns.computeIfAbsent(context.toString(), k -> new HashSet<>());
+        Profilers.contextToBreakdowns.get(context.toString()).add(this);
         setContextInstance(context);
         return this;
     }

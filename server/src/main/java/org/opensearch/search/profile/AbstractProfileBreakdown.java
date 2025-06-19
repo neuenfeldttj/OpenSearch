@@ -49,19 +49,7 @@ import static java.util.Collections.emptyMap;
  */
 public abstract class AbstractProfileBreakdown {
 
-    private final Map<String, Metric> metrics;
-
-    public AbstractProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
-        Map<String, Metric> metrics = new HashMap<>();
-        for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
-            try {
-                metrics.put(entry.getKey(), entry.getValue().getDeclaredConstructor(String.class).newInstance(entry.getKey()));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        this.metrics = metrics;
-    }
+    private final Map<String, Metric> metrics = new HashMap<>();
 
     public Metric getMetric(String name) {
         return metrics.get(name);
@@ -69,6 +57,10 @@ public abstract class AbstractProfileBreakdown {
 
     public Map<String, Metric> getMetrics() {
         return Collections.unmodifiableMap(metrics);
+    }
+
+    public void setMetrics(Map<String, Metric> metrics) {
+        this.metrics.putAll(metrics);
     }
 
     /**

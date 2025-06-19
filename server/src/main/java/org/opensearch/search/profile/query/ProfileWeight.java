@@ -43,6 +43,7 @@ import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Timer;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Weight wrapper that will compute how much time it takes to build the
@@ -55,11 +56,13 @@ public final class ProfileWeight extends Weight {
 
     private final Weight subQueryWeight;
     private final AbstractQueryProfileBreakdown profile;
+    private final List<AbstractQueryProfileBreakdown> pluginBreakdowns;
 
-    public ProfileWeight(Query query, Weight subQueryWeight, AbstractQueryProfileBreakdown profile) throws IOException {
+    public ProfileWeight(Query query, Weight subQueryWeight, AbstractQueryProfileBreakdown profile, List<AbstractQueryProfileBreakdown> pluginBreakdowns) throws IOException {
         super(query);
         this.subQueryWeight = subQueryWeight;
         this.profile = profile;
+        this.pluginBreakdowns = pluginBreakdowns;
     }
 
     @Override
@@ -117,5 +120,8 @@ public final class ProfileWeight extends Weight {
 
     public void associateCollectorToLeaves(LeafReaderContext leaf, Collector collector) {
         profile.associateCollectorToLeaves(collector, leaf);
+        for (AbstractQueryProfileBreakdown breakdown : pluginBreakdowns) {
+            breakdown.associateCollectorToLeaves(collector, leaf);
+        }
     }
 }

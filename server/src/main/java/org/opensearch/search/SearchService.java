@@ -135,6 +135,7 @@ import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Profilers;
 import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.query.AbstractQueryProfiler;
 import org.opensearch.search.profile.query.InternalQueryProfileTree;
 import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.query.QueryPhase;
@@ -1569,7 +1570,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         if (source.profile()) {
             Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch());
             for(SearchPlugin.ProfilerProvider p : pluginProfilers) {
-                QueryProfiler profiler = p.getPluginProfiler(context);
+                AbstractQueryProfiler profiler = p.getPluginProfiler(context);
                 if(profiler != null) profilers.addPluginProfiler(profiler);
             }
             context.setProfilers(profilers);

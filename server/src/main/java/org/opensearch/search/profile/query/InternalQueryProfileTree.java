@@ -38,6 +38,7 @@ import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +48,13 @@ import java.util.Map;
  *
  * @opensearch.internal
  */
-@PublicApi(since="3.0.0")
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
+
+    Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
+
+    public InternalQueryProfileTree(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        this.breakdownClass = breakdownClass;
+    }
 
     @Override
     protected ProfileResult createProfileResult(String type, String description, AbstractQueryProfileBreakdown breakdown, List<ProfileResult> childrenProfileResults) {
@@ -56,7 +62,7 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
             type,
             description,
             breakdown.toBreakdownMap(),
-            breakdown.getContextInstance().toString(),
+            breakdown.getContextInstance(),
             breakdown.toDebugMap(),
             breakdown.toNodeTime(),
             childrenProfileResults
@@ -65,10 +71,10 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
     @Override
     protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        Map<String, Class<? extends Metric>> metricClasses = new HashMap<>();
-        for(QueryTimingType type : QueryTimingType.values()) {
-            metricClasses.put(type.toString(), Timer.class);
+        try {
+            return breakdownClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return new QueryProfileBreakdown(metricClasses);
     }
 }

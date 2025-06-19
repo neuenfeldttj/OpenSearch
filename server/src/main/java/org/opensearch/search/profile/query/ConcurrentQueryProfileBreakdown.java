@@ -14,6 +14,7 @@ import org.opensearch.OpenSearchException;
 import org.opensearch.core.ParseField;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.Profilers;
 import org.opensearch.search.profile.Timer;
 import org.opensearch.search.sort.BucketedSort;
 
@@ -54,7 +55,11 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     private Set<String> nonTimingMetrics;
 
     public ConcurrentQueryProfileBreakdown(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
-        super(Map.of());
+        Map<String, Metric> metrics = new HashMap<>();
+        for(QueryTimingType type : QueryTimingType.values()) {
+            metrics.put(type.toString(), new Timer(type.toString()));
+        }
+        setMetrics(metrics);
         this.breakdownClass = breakdownClass;
     }
 
@@ -66,6 +71,12 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
         if (profile != null) {
             return profile;
         }
+
+
+        //TODO: need to fix for concurrency!
+//        Profilers.contextToBreakdowns.computeIfAbsent(context.toString(), k -> new HashSet<>());
+//        Profilers.contextToBreakdowns.get(context.toString()).add(this);
+        setContextInstance(context);
 
         return contexts.computeIfAbsent(context, ctx -> {
             try {

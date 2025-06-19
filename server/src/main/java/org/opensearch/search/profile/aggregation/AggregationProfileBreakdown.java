@@ -52,8 +52,12 @@ import static java.util.Collections.unmodifiableMap;
 public class AggregationProfileBreakdown extends AbstractProfileBreakdown {
     private final Map<String, Object> extra = new HashMap<>();
 
-    public AggregationProfileBreakdown(Map<String, Class<? extends Metric>> timers) {
-        super(timers);
+    public AggregationProfileBreakdown() {
+        Map<String, Metric> metrics = new HashMap<>();
+        for(AggregationTimingType type : AggregationTimingType.values()) {
+            metrics.put(type.toString(), new Timer(type.toString()));
+        }
+        setMetrics(metrics);
     }
 
     /**

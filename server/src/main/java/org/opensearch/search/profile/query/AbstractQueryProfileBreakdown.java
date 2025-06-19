@@ -23,13 +23,10 @@ import java.util.Map;
  *
  * @opensearch.internal
  */
+@PublicApi(since = "3.0.0")
 public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
 
     private Object contextInstance;
-
-    public AbstractQueryProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
-        super(metricClasses);
-    }
 
     public abstract AbstractQueryProfileBreakdown context(Object context);
 
@@ -37,8 +34,9 @@ public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreak
         this.contextInstance = contextInstance;
     }
 
-    public Object getContextInstance() {
-        return contextInstance;
+    public String getContextInstance() {
+        if(contextInstance == null) return "";
+        return contextInstance.toString();
     }
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}

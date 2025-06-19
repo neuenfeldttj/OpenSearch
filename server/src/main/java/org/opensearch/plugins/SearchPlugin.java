@@ -72,6 +72,7 @@ import org.opensearch.search.internal.SearchContext;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.query.AbstractQueryProfiler;
 import org.opensearch.search.profile.query.InternalQueryProfileTree;
 import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.query.QueryPhaseSearcher;
@@ -249,7 +250,7 @@ public interface SearchPlugin {
          * Provides a plugin profiler instance
          * @return profiler instance
          */
-        QueryProfiler getPluginProfiler(SearchContext context);
+        AbstractQueryProfiler getPluginProfiler(SearchContext context);
     }
 
     /**

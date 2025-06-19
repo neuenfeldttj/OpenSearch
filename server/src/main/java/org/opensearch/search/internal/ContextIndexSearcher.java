@@ -107,11 +107,11 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
     private static final int CHECK_CANCELLED_SCORER_INTERVAL = 1 << 11;
 
     private AggregatedDfs aggregatedDfs;
-    private QueryProfiler profiler;
+    private AbstractQueryProfiler profiler;
     private MutableQueryTimeout cancellable;
     private SearchContext searchContext;
 
-    private List<QueryProfiler> pluginProfilers;
+    private List<AbstractQueryProfiler> pluginProfilers;
 
     public ContextIndexSearcher(
         IndexReader reader,
@@ -153,22 +153,14 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         this.pluginProfilers = new ArrayList<>();
     }
 
-    public void setQueryProfiler(QueryProfiler profiler) {
+    public void setQueryProfiler(AbstractQueryProfiler profiler) {
         this.profiler = profiler;
     }
 
-    public void setPluginProfilers(List<QueryProfiler> pluginProfilers) {
+    public void setPluginProfilers(List<AbstractQueryProfiler> pluginProfilers) {
         this.pluginProfilers = pluginProfilers;
     }
 
-    public QueryProfiler getPluginProfiler(Class<? extends QueryProfiler> clazz) {
-        for (QueryProfiler profiler : pluginProfilers) {
-            if (profiler.getClass().equals(clazz)) {
-                return profiler;
-            }
-        }
-        return null;
-    }
 
     /**
      * Add a {@link Runnable} that will be run on a regular basis while accessing documents in the
@@ -228,6 +220,10 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // each invocation so that it can build an internal representation of the query
             // tree
             AbstractQueryProfileBreakdown profile = profiler.getBreakdown(query);
+            List<AbstractQueryProfileBreakdown> pluginBreakdowns = new ArrayList<>();
+            for(AbstractQueryProfiler pluginProfiler : pluginProfilers) {
+                pluginBreakdowns.add(pluginProfiler.getBreakdown(query));
+            }
             Timer timer = (Timer) profile.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
             timer.start();
             final Weight weight;
@@ -237,7 +233,10 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
                 timer.stop();
                 profiler.pollLastElement();
             }
-            return new ProfileWeight(query, weight, profile);
+            for(AbstractQueryProfiler pluginProfiler : pluginProfilers) {
+                pluginProfiler.pollLastElement();
+            }
+            return new ProfileWeight(query, weight, profile, pluginBreakdowns);
         } else {
             return super.createWeight(query, scoreMode, boost);
         }

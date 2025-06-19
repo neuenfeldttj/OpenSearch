@@ -9,6 +9,7 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
+import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
@@ -25,9 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * This class acts as a thread-local storage for profiling a query with concurrent execution
  *
- * @opensearch.internal
+ * @opensearch.api
  */
-public final class ConcurrentQueryProfiler extends QueryProfiler {
+@PublicApi(since = "3.0.0")
+public final class ConcurrentQueryProfiler extends AbstractQueryProfiler {
 
     private final Map<Long, ConcurrentQueryProfileTree> threadToProfileTree;
     // The LinkedList does not need to be thread safe, as the map associates thread IDs with LinkedList, and only
@@ -36,8 +38,8 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
 
     private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
-        super(profileTree);
+    public ConcurrentQueryProfiler(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        super(new ConcurrentQueryProfileTree(breakdownClass));
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
         threadToProfileTree = Collections.synchronizedMap(new LinkedHashMap<>());

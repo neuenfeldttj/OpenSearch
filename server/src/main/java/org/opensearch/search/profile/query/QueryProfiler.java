@@ -32,12 +32,7 @@
 
 package org.opensearch.search.profile.query;
 
-import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.AbstractProfiler;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-
-import java.util.Objects;
 
 /**
  * This class acts as a thread-local storage for profiling a query.  It also
@@ -53,55 +48,22 @@ import java.util.Objects;
  * @opensearch.api
  */
 @PublicApi(since = "1.0.0")
-public class QueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdown, Query, QueryProfileShardResult> {
+public class QueryProfiler extends AbstractQueryProfiler {
 
-    /**
-     * The root Collector used in the search
-     */
-    private InternalProfileComponent collector;
-
-    public QueryProfiler(AbstractQueryProfileTree profileTree) {
-        super(profileTree);
+    public QueryProfiler(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+        super(new InternalQueryProfileTree(breakdownClass));
     }
 
-    /** Set the collector that is associated with this profiler. */
-    public void setCollector(InternalProfileComponent collector) {
-        if (this.collector != null) {
-            throw new IllegalStateException("The collector can only be set once.");
-        }
-        this.collector = Objects.requireNonNull(collector);
-    }
-
-    /**
-     * Begin timing the rewrite phase of a request.  All rewrites are accumulated together into a
-     * single metric
-     */
     public void startRewriteTime() {
         ((AbstractQueryProfileTree) profileTree).startRewriteTime();
     }
 
-    /**
-     * Stop recording the current rewrite and add it's time to the total tally, returning the
-     * cumulative time so far.
-     */
     public void stopAndAddRewriteTime() {
         ((AbstractQueryProfileTree) profileTree).stopAndAddRewriteTime();
     }
 
-    /**
-     * The rewriting process is complex and hard to display because queries can undergo significant changes.
-     * Instead of showing intermediate results, we display the cumulative time for the non-concurrent search case.
-     * @return total time taken to rewrite all queries in this profile
-     */
     public long getRewriteTime() {
         return ((AbstractQueryProfileTree) profileTree).getRewriteTime();
-    }
-
-    /**
-     * Return the current root Collector for this search
-     */
-    public CollectorResult getCollector() {
-        return collector.getCollectorTree();
     }
 
     @Override

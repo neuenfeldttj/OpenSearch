@@ -42,9 +42,7 @@ import org.opensearch.index.similarity.ScriptedSimilarity;
 import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.profile.aggregation.AggregationProfileShardResult;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
-import org.opensearch.search.profile.query.CollectorResult;
-import org.opensearch.search.profile.query.QueryProfileShardResult;
-import org.opensearch.search.profile.query.QueryProfiler;
+import org.opensearch.search.profile.query.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -197,21 +195,16 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
      *         shard
      */
     public static ProfileShardResult buildShardResults(Profilers profilers, ShardSearchRequest request) {
-        List<QueryProfiler> queryProfilers = profilers.getQueryProfilers();
+        List<AbstractQueryProfiler> queryProfilers = profilers.getQueryProfilers();
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
-        List<QueryProfiler> pluginProfilers = profilers.getPluginProfilers();
+        List<AbstractQueryProfiler> pluginProfilers = profilers.getPluginProfilers();
+        combineTrees(queryProfilers, pluginProfilers);
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
-        List<QueryProfileShardResult> pluginResults = new ArrayList<>(pluginProfilers.size());
-        for (QueryProfiler queryProfiler : queryProfilers) {
+        for (AbstractQueryProfiler queryProfiler : queryProfilers) {
             QueryProfileShardResult result = queryProfiler.createProfileShardResult();
             queryResults.add(result);
         }
         AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
-        for(QueryProfiler profiler : pluginProfilers) {
-            QueryProfileShardResult result = profiler.createProfileShardResult();
-            pluginResults.add(result);
-        }
-        combineTrees(queryResults, pluginResults);
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {
             networkTime.setInboundNetworkTime(request.getInboundNetworkTime());
@@ -220,12 +213,12 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         return new ProfileShardResult(queryResults, aggResults, networkTime);
     }
 
-    private static void combineTrees(List<QueryProfileShardResult> queryResults, List<QueryProfileShardResult> pluginResults) {
-        for(QueryProfileShardResult queryResult : queryResults) {
-            List<ProfileResult> queryProfileResults = queryResult.getProfileResults();
+    private static void combineTrees(List<AbstractQueryProfiler> queryResults, List<AbstractQueryProfiler> pluginResults) {
+        for(AbstractQueryProfiler queryResult : queryResults) {
+            List<ProfileResult> queryProfileResults = queryResult.getTree();
             for(ProfileResult queryProfileResult : queryProfileResults) {
-                for (QueryProfileShardResult pluginResult : pluginResults) {
-                    List<ProfileResult> pluginProfileResults = pluginResult.getProfileResults();
+                for (AbstractQueryProfiler pluginResult : pluginResults) {
+                    List<ProfileResult> pluginProfileResults = pluginResult.getTree();
                     for(ProfileResult pluginProfileResult : pluginProfileResults) {
                         if(pluginProfileResult.getContextInstance().equals(queryProfileResult.getContextInstance())) {
                             // combine the plugin breakdown info into the query breakdown info
@@ -236,4 +229,14 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
             }
         }
     }
+
+//    private static void combineTrees(List<QueryProfileShardResult> queryResults) {
+//        for(QueryProfileShardResult queryResult : queryResults) {
+//            for(ProfileResult profileResult : queryResult.getProfileResults()) {
+//                for(AbstractQueryProfileBreakdown breakdown: Profilers.contextToBreakdowns.get(profileResult.getContextInstance())) {
+//                    profileResult.getBreakdown().putAll(breakdown.toBreakdownMap());
+//                }
+//            }
+//        }
+//    }
 }
