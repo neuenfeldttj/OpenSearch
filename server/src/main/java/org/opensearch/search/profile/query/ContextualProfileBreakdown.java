@@ -25,11 +25,11 @@ import java.util.Map;
  * @opensearch.internal
  */
 @PublicApi(since = "3.0.0")
-public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
+public abstract class ContextualProfileBreakdown extends AbstractProfileBreakdown {
 
     private Query query;
 
-    public abstract AbstractQueryProfileBreakdown context(Object context);
+    public abstract ContextualProfileBreakdown context(Object context);
 
     public void setQuery(Query query) {
         this.query = query;

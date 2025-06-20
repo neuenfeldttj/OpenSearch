@@ -153,7 +153,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         this.pluginProfilers = new ArrayList<>();
     }
 
-    public void setQueryProfiler(AbstractQueryProfiler profiler) {
+    public void setProfiler(AbstractQueryProfiler profiler) {
         this.profiler = profiler;
     }
 
@@ -219,10 +219,10 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // createWeight() is called for each query in the tree, so we tell the queryProfiler
             // each invocation so that it can build an internal representation of the query
             // tree
-            AbstractQueryProfileBreakdown profile = profiler.getBreakdown(query);
-            List<AbstractQueryProfileBreakdown> pluginBreakdowns = new ArrayList<>();
+            ContextualProfileBreakdown profile = profiler.getQueryBreakdown(query);
+            List<ContextualProfileBreakdown> pluginBreakdowns = new ArrayList<>();
             for(AbstractQueryProfiler pluginProfiler : pluginProfilers) {
-                pluginBreakdowns.add(pluginProfiler.getBreakdown(query));
+                pluginBreakdowns.add(pluginProfiler.getQueryBreakdown(query));
             }
             Timer timer = (Timer) profile.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
             timer.start();

@@ -25,15 +25,15 @@ import java.util.Map;
  */
 public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
 
-    public Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
+    public Class<? extends ContextualProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfileTree(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+    public ConcurrentQueryProfileTree(Class<? extends ContextualProfileBreakdown> breakdownClass) {
         this.breakdownClass = breakdownClass;
     }
 
     @Override
-    protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        AbstractQueryProfileBreakdown breakdown = new ConcurrentQueryProfileBreakdown(breakdownClass);
+    protected ContextualProfileBreakdown createProfileBreakdown(Query query) {
+        ContextualProfileBreakdown breakdown = new ConcurrentQueryProfileBreakdown(breakdownClass);
         breakdown.setQuery(query);
         if(!breakdownClass.equals(QueryProfileBreakdown.class)) {
             Profilers.queriesToBreakdowns.computeIfAbsent(query, q -> new HashSet<>()).add(breakdown);
@@ -45,7 +45,7 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
     protected ProfileResult createProfileResult(
         String type,
         String description,
-        AbstractQueryProfileBreakdown breakdown,
+        ContextualProfileBreakdown breakdown,
         List<ProfileResult> childrenProfileResults
     ) {
         assert breakdown instanceof ConcurrentQueryProfileBreakdown;
@@ -96,7 +96,7 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
         final List<Integer> children = tree.get(parentToken);
         if (children != null) {
             for (Integer currentChild : children) {
-                final AbstractQueryProfileBreakdown currentChildBreakdown = breakdowns.get(currentChild);
+                final ContextualProfileBreakdown currentChildBreakdown = breakdowns.get(currentChild);
                 currentChildBreakdown.associateCollectorsToLeaves(collectorToLeaves);
                 updateCollectorToLeavesForChildBreakdowns(currentChild, collectorToLeaves);
             }

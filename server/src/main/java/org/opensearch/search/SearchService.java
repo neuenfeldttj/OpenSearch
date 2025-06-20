@@ -134,7 +134,7 @@ import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Profilers;
-import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.query.ContextualProfileBreakdown;
 import org.opensearch.search.profile.query.AbstractQueryProfiler;
 import org.opensearch.search.profile.query.InternalQueryProfileTree;
 import org.opensearch.search.profile.query.QueryProfiler;

@@ -18,7 +18,7 @@ import java.util.Objects;
  * Base class for all query profilers
  */
 @PublicApi(since = "3.0.0")
-public abstract class AbstractQueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdown, Query, QueryProfileShardResult> {
+public abstract class AbstractQueryProfiler extends AbstractProfiler<ContextualProfileBreakdown, Query, QueryProfileShardResult> {
 
     /**
      * The root Collector used in the search

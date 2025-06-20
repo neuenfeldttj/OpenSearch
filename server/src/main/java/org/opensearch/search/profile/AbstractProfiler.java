@@ -51,7 +51,7 @@ public abstract class AbstractProfiler<PB extends AbstractProfileBreakdown, E, S
      * Get the {@link AbstractProfileBreakdown} for the given element in the
      * tree, potentially creating it if it did not exist.
      */
-    public PB getBreakdown(E query) {
+    public PB getQueryBreakdown(E query) {
         return profileTree.getProfileBreakdown(query);
     }
 

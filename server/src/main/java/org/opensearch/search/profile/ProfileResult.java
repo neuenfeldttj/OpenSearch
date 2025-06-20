@@ -187,7 +187,7 @@ public final class ProfileResult implements Writeable, ToXContentObject {
     /**
      * The timing breakdown for this node.
      */
-    public Map<String, Long> getBreakdown() {
+    public Map<String, Long> getTimeBreakdown() {
         return breakdown;
     }
 

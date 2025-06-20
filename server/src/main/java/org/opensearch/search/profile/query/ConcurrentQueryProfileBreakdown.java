@@ -32,7 +32,7 @@ import static org.opensearch.search.profile.Timer.*;
  *
  * @opensearch.internal
  */
-public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileBreakdown {
+public final class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown {
     static final String SLICE_END_TIME_SUFFIX = "_slice_end_time";
     static final String SLICE_START_TIME_SUFFIX = "_slice_start_time";
     static final String MAX_PREFIX = "max_";
@@ -44,17 +44,17 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     private long avgSliceNodeTime = 0L;
 
     // keep track of all breakdown timings per segment. package-private for testing
-    private final Map<Object, AbstractQueryProfileBreakdown> contexts = new ConcurrentHashMap<>();
+    private final Map<Object, ContextualProfileBreakdown> contexts = new ConcurrentHashMap<>();
 
     // represents slice to leaves mapping as for each slice a unique collector instance is created
     private final Map<Collector, List<LeafReaderContext>> sliceCollectorsToLeaves = new ConcurrentHashMap<>();
 
-    private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
+    private final Class<? extends ContextualProfileBreakdown> breakdownClass;
 
     private Set<String> timingMetrics;
     private Set<String> nonTimingMetrics;
 
-    public ConcurrentQueryProfileBreakdown(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+    public ConcurrentQueryProfileBreakdown(Class<? extends ContextualProfileBreakdown> breakdownClass) {
         Map<String, Metric> metrics = new HashMap<>();
         for(QueryTimingType type : QueryTimingType.values()) {
             metrics.put(type.toString(), new Timer(type.toString()));
@@ -64,9 +64,9 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     }
 
     @Override
-    public AbstractQueryProfileBreakdown context(Object context) {
+    public ContextualProfileBreakdown context(Object context) {
         // See please https://bugs.openjdk.java.net/browse/JDK-8161372
-        final AbstractQueryProfileBreakdown profile = contexts.get(context);
+        final ContextualProfileBreakdown profile = contexts.get(context);
 
         if (profile != null) {
             return profile;
@@ -491,7 +491,7 @@ public final class ConcurrentQueryProfileBreakdown extends AbstractQueryProfileB
     }
 
     // used by tests
-    Map<Object, AbstractQueryProfileBreakdown> getContexts() {
+    Map<Object, ContextualProfileBreakdown> getContexts() {
         return contexts;
     }
 

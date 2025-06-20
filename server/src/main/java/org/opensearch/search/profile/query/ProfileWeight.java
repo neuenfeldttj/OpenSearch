@@ -55,10 +55,10 @@ import java.util.List;
 public final class ProfileWeight extends Weight {
 
     private final Weight subQueryWeight;
-    private final AbstractQueryProfileBreakdown profile;
-    private final List<AbstractQueryProfileBreakdown> pluginBreakdowns;
+    private final ContextualProfileBreakdown profile;
+    private final List<ContextualProfileBreakdown> pluginBreakdowns;
 
-    public ProfileWeight(Query query, Weight subQueryWeight, AbstractQueryProfileBreakdown profile, List<AbstractQueryProfileBreakdown> pluginBreakdowns) throws IOException {
+    public ProfileWeight(Query query, Weight subQueryWeight, ContextualProfileBreakdown profile, List<ContextualProfileBreakdown> pluginBreakdowns) throws IOException {
         super(query);
         this.subQueryWeight = subQueryWeight;
         this.profile = profile;
@@ -120,7 +120,7 @@ public final class ProfileWeight extends Weight {
 
     public void associateCollectorToLeaves(LeafReaderContext leaf, Collector collector) {
         profile.associateCollectorToLeaves(collector, leaf);
-        for (AbstractQueryProfileBreakdown breakdown : pluginBreakdowns) {
+        for (ContextualProfileBreakdown breakdown : pluginBreakdowns) {
             breakdown.associateCollectorToLeaves(collector, leaf);
         }
     }

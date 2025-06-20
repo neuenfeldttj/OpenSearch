@@ -30,7 +30,6 @@ public class AbstractProfileBreakdownTests extends OpenSearchTestCase {
         Map<String, Long> stats;
 
         TestProfileBreakdown() {
-            super(Map.of());
             stats = new HashMap<String, Long>();
             long counter = 123;
             for(TestType type : TestType.values()) {

@@ -36,9 +36,9 @@ public final class ConcurrentQueryProfiler extends AbstractQueryProfiler {
     // one thread will access the LinkedList at a time.
     private final Map<Long, LinkedList<Timer>> threadToRewriteTimers;
 
-    private final Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
+    private final Class<? extends ContextualProfileBreakdown> breakdownClass;
 
-    public ConcurrentQueryProfiler(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+    public ConcurrentQueryProfiler(Class<? extends ContextualProfileBreakdown> breakdownClass) {
         super(new ConcurrentQueryProfileTree(breakdownClass));
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
@@ -50,7 +50,7 @@ public final class ConcurrentQueryProfiler extends AbstractQueryProfiler {
     }
 
     @Override
-    public AbstractQueryProfileBreakdown getBreakdown(Query query) {
+    public ContextualProfileBreakdown getQueryBreakdown(Query query) {
         ConcurrentQueryProfileTree profileTree = threadToProfileTree.computeIfAbsent(
             getCurrentThreadId(),
             k -> new ConcurrentQueryProfileTree(breakdownClass)

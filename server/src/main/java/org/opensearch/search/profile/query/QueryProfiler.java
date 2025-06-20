@@ -50,7 +50,7 @@ import org.opensearch.common.annotation.PublicApi;
 @PublicApi(since = "1.0.0")
 public class QueryProfiler extends AbstractQueryProfiler {
 
-    public QueryProfiler(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+    public QueryProfiler(Class<? extends ContextualProfileBreakdown> breakdownClass) {
         super(new InternalQueryProfileTree(breakdownClass));
     }
 

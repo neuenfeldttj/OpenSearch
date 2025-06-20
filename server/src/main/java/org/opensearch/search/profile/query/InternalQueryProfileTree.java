@@ -52,14 +52,14 @@ import java.util.Map;
  */
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
-    Class<? extends AbstractQueryProfileBreakdown> breakdownClass;
+    Class<? extends ContextualProfileBreakdown> breakdownClass;
 
-    public InternalQueryProfileTree(Class<? extends AbstractQueryProfileBreakdown> breakdownClass) {
+    public InternalQueryProfileTree(Class<? extends ContextualProfileBreakdown> breakdownClass) {
         this.breakdownClass = breakdownClass;
     }
 
     @Override
-    protected ProfileResult createProfileResult(String type, String description, AbstractQueryProfileBreakdown breakdown, List<ProfileResult> childrenProfileResults) {
+    protected ProfileResult createProfileResult(String type, String description, ContextualProfileBreakdown breakdown, List<ProfileResult> childrenProfileResults) {
         return new ProfileResult(
             type,
             description,
@@ -72,9 +72,9 @@ public class InternalQueryProfileTree extends AbstractQueryProfileTree {
     }
 
     @Override
-    protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
+    protected ContextualProfileBreakdown createProfileBreakdown(Query query) {
         try {
-            AbstractQueryProfileBreakdown breakdown = breakdownClass.getDeclaredConstructor().newInstance();
+            ContextualProfileBreakdown breakdown = breakdownClass.getDeclaredConstructor().newInstance();
             if(!breakdownClass.equals(QueryProfileBreakdown.class)) {
                 Profilers.queriesToBreakdowns.computeIfAbsent(query, q -> new HashSet<>()).add(breakdown);
             }

@@ -55,7 +55,7 @@ public final class Profilers {
     private final boolean isConcurrentSegmentSearchEnabled;
     private final List<AbstractQueryProfiler> pluginProfilers;
 
-    public static Map<Query, Set<AbstractQueryProfileBreakdown>> queriesToBreakdowns = new HashMap<>();
+    public static Map<Query, Set<ContextualProfileBreakdown>> queriesToBreakdowns = new HashMap<>();
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
     public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled) {
@@ -73,7 +73,7 @@ public final class Profilers {
         AbstractQueryProfiler profiler = isConcurrentSegmentSearchEnabled
             ? new ConcurrentQueryProfiler(QueryProfileBreakdown.class)
             : new QueryProfiler(QueryProfileBreakdown.class);
-        searcher.setQueryProfiler(profiler);
+        searcher.setProfiler(profiler);
         queryProfilers.add(profiler);
         return profiler;
     }

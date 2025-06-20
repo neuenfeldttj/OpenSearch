@@ -44,7 +44,7 @@ import java.util.*;
  *
  * @opensearch.internal
  */
-public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
+public final class QueryProfileBreakdown extends ContextualProfileBreakdown {
 
     public QueryProfileBreakdown() {
         Map<String, Metric> metrics = new HashMap<>();
@@ -55,7 +55,7 @@ public final class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
     }
 
     @Override
-    public AbstractQueryProfileBreakdown context(Object context) {
+    public ContextualProfileBreakdown context(Object context) {
         return this;
     }
 }

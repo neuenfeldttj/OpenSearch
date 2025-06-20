@@ -251,7 +251,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertEquals(result.getQueryName(), "TermQuery");
                     assertEquals(result.getLuceneDescription(), "field1:one");
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -293,7 +293,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertEquals(result.getQueryName(), "BooleanQuery");
                     assertEquals(result.getLuceneDescription(), "+field1:one +field1:two");
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertEquals(result.getProfiledChildren().size(), 2);
                     assertQueryProfileResult(result);
 
@@ -305,7 +305,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertEquals(childProfile.getQueryName(), "TermQuery");
                     assertEquals(childProfile.getLuceneDescription(), "field1:one");
                     assertThat(childProfile.getTime(), greaterThan(0L));
-                    assertNotNull(childProfile.getBreakdown());
+                    assertNotNull(childProfile.getTimeBreakdown());
                     assertEquals(childProfile.getProfiledChildren().size(), 0);
                     assertQueryProfileResult(childProfile);
 
@@ -313,7 +313,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertEquals(childProfile.getQueryName(), "TermQuery");
                     assertEquals(childProfile.getLuceneDescription(), "field1:two");
                     assertThat(childProfile.getTime(), greaterThan(0L));
-                    assertNotNull(childProfile.getBreakdown());
+                    assertNotNull(childProfile.getTimeBreakdown());
                     assertQueryProfileResult(childProfile);
                 }
 
@@ -356,7 +356,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -402,7 +402,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -443,7 +443,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -495,7 +495,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    Map<String, Long> breakdown = result.getBreakdown();
+                    Map<String, Long> breakdown = result.getTimeBreakdown();
                     Long maxSliceTime = result.getMaxSliceTime();
                     Long minSliceTime = result.getMinSliceTime();
                     Long avgSliceTime = result.getAvgSliceTime();
@@ -567,7 +567,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -607,7 +607,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -661,7 +661,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
                     assertNotNull(result.getQueryName());
                     assertNotNull(result.getLuceneDescription());
                     assertThat(result.getTime(), greaterThan(0L));
-                    assertNotNull(result.getBreakdown());
+                    assertNotNull(result.getTimeBreakdown());
                     assertQueryProfileResult(result);
                 }
 
@@ -696,7 +696,7 @@ public class QueryProfilerIT extends ParameterizedDynamicSettingsOpenSearchInteg
     }
 
     private void assertQueryProfileResult(ProfileResult result) {
-        Map<String, Long> breakdown = result.getBreakdown();
+        Map<String, Long> breakdown = result.getTimeBreakdown();
         Long maxSliceTime = result.getMaxSliceTime();
         Long minSliceTime = result.getMinSliceTime();
         Long avgSliceTime = result.getAvgSliceTime();

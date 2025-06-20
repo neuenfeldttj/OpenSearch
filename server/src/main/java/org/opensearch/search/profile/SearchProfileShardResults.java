@@ -216,8 +216,8 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         for(ProfileResult queryResult : queryResults) {
             //check if query matches anything in the map of queriesToBreakdowns. If so, add them
             if(Profilers.queriesToBreakdowns.containsKey(queryResult.getQuery())) {
-                for(AbstractQueryProfileBreakdown breakdown: Profilers.queriesToBreakdowns.get(queryResult.getQuery())) {
-                    queryResult.getBreakdown().putAll(breakdown.toBreakdownMap());
+                for(ContextualProfileBreakdown breakdown: Profilers.queriesToBreakdowns.get(queryResult.getQuery())) {
+                    queryResult.getTimeBreakdown().putAll(breakdown.toBreakdownMap());
                 }
             }
             combineTrees(queryResult.getProfiledChildren());
@@ -227,8 +227,8 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
 //    private static void combineTrees(List<QueryProfileShardResult> queryResults) {
 //        for(QueryProfileShardResult queryResult : queryResults) {
 //            for(ProfileResult profileResult : queryResult.getProfileResults()) {
-//                for(AbstractQueryProfileBreakdown breakdown: Profilers.contextToBreakdowns.get(profileResult.getContextInstance())) {
-//                    profileResult.getBreakdown().putAll(breakdown.toBreakdownMap());
+//                for(ContextualProfileBreakdown breakdown: Profilers.contextToBreakdowns.get(profileResult.getContextInstance())) {
+//                    profileResult.getTimeBreakdown().putAll(breakdown.toBreakdownMap());
 //                }
 //            }
 //        }

@@ -61,10 +61,10 @@ public class AggregationProfiler extends AbstractProfiler<AggregationProfileBrea
      * on the Aggregation collector instances during construction.
      */
     @Override
-    public AggregationProfileBreakdown getBreakdown(Aggregator agg) {
+    public AggregationProfileBreakdown getQueryBreakdown(Aggregator agg) {
         AggregationProfileBreakdown aggregationProfileBreakdown = profileBreakdownLookup.get(agg);
         if (aggregationProfileBreakdown == null) {
-            aggregationProfileBreakdown = super.getBreakdown(agg);
+            aggregationProfileBreakdown = super.getQueryBreakdown(agg);
             profileBreakdownLookup.put(agg, aggregationProfileBreakdown);
         }
         return aggregationProfileBreakdown;
