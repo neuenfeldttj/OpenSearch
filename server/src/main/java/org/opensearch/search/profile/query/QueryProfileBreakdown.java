@@ -32,10 +32,13 @@
 
 package org.opensearch.search.profile.query;
 
-import org.opensearch.search.profile.*;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.Timer;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * A record of timings for the various operations that may happen during query execution.

@@ -11,7 +11,9 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.*;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileResult;
+import org.opensearch.search.profile.Profilers;
 
 import java.util.HashSet;
 import java.util.List;
@@ -75,7 +77,7 @@ public class ConcurrentQueryProfileTree extends AbstractQueryProfileTree {
     @Override
     public List<ProfileResult> getTree() {
         for (Integer root : roots) {
-            final AbstractProfileBreakdown parentBreakdown = breakdowns.get(root);
+            final ContextualProfileBreakdown parentBreakdown = breakdowns.get(root);
             assert parentBreakdown instanceof ConcurrentQueryProfileBreakdown;
             final Map<Collector, List<LeafReaderContext>> parentCollectorToLeaves = ((ConcurrentQueryProfileBreakdown) parentBreakdown)
                 .getSliceCollectorsToLeaves();

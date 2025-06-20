@@ -11,13 +11,24 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.opensearch.OpenSearchException;
-import org.opensearch.search.profile.*;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.Timer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.opensearch.search.profile.Timer.*;
+import static org.opensearch.search.profile.Timer.TIMING_TYPE_COUNT_SUFFIX;
+import static org.opensearch.search.profile.Timer.TIMING_TYPE_START_TIME_SUFFIX;
+
 
 /**
  * A record of timings for the various operations that may happen during query execution.

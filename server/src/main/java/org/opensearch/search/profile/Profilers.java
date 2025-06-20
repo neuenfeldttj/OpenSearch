@@ -37,9 +37,18 @@ import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.internal.ContextIndexSearcher;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
 import org.opensearch.search.profile.aggregation.ConcurrentAggregationProfiler;
-import org.opensearch.search.profile.query.*;
+import org.opensearch.search.profile.query.ConcurrentQueryProfiler;
+import org.opensearch.search.profile.query.InternalQueryProfileTree;
+import org.opensearch.search.profile.query.QueryProfileBreakdown;
+import org.opensearch.search.profile.query.QueryProfiler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Wrapper around all the profilers that makes management easier.

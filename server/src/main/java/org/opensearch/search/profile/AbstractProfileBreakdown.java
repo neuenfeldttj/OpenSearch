@@ -32,8 +32,10 @@
 
 package org.opensearch.search.profile;
 
-import java.util.*;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static java.util.Collections.emptyMap;
 

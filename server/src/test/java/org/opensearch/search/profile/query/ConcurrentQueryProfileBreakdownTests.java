@@ -25,6 +25,7 @@ import org.apache.lucene.index.NoMergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.store.Directory;
+import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.ContextualProfileBreakdown;
 import org.opensearch.search.profile.Timer;
 import org.opensearch.test.OpenSearchTestCase;
@@ -46,8 +47,8 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
 
     @Before
     public void setup() {
-        testQueryProfileBreakdown = new ConcurrentQueryProfileBreakdown(null);
-        createWeightTimer =  testQueryProfileBreakdown.getTimer(QueryTimingType.CREATE_WEIGHT);
+        testQueryProfileBreakdown = new ConcurrentQueryProfileBreakdown(QueryProfileBreakdown.class);
+        createWeightTimer = testQueryProfileBreakdown.getTimer(QueryTimingType.CREATE_WEIGHT);
         try {
             createWeightTimer.start();
             Thread.sleep(10);
@@ -239,7 +240,7 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
             String timingTypeCountKey = queryTimingType + TIMING_TYPE_COUNT_SUFFIX;
 
             if (queryTimingType.equals(QueryTimingType.CREATE_WEIGHT)) {
-                final long createWeightTime = queryBreakDownMap.get(queryTimingType );
+                final long createWeightTime = queryBreakDownMap.get(timingTypeKey);
                 assertEquals(createWeightTimer.getApproximateTiming(), createWeightTime);
                 assertEquals(1, (long) queryBreakDownMap.get(timingTypeCountKey));
                 // verify there is no min/max/avg for weight type stats
@@ -253,7 +254,7 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
                 );
                 continue;
             }
-            assertEquals(50, (long) queryBreakDownMap.get(timingTypeKey ));
+            assertEquals(50, (long) queryBreakDownMap.get(timingTypeKey));
             assertEquals(20, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.MAX_PREFIX + timingTypeKey));
             assertEquals(15, (long) queryBreakDownMap.get(ConcurrentQueryProfileBreakdown.AVG_PREFIX + timingTypeKey));
             assertEquals(10, (long) queryBreakDownMap.get(MIN_PREFIX + timingTypeKey));
@@ -386,7 +387,7 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
                 continue;
             }
             String timingTypeKey = timingType.toString();
-            leafBreakDownMap.put(timingTypeKey , timeTaken);
+            leafBreakDownMap.put(timingTypeKey, timeTaken);
             leafBreakDownMap.put(timingTypeKey + TIMING_TYPE_COUNT_SUFFIX, count);
             leafBreakDownMap.put(timingTypeKey + TIMING_TYPE_START_TIME_SUFFIX, startTime);
         }
@@ -422,7 +423,7 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
         }
 
         @Override
-        public ContextualProfileBreakdown context(Object context) {
+        public AbstractProfileBreakdown context(Object context) {
             return null;
         }
     }
