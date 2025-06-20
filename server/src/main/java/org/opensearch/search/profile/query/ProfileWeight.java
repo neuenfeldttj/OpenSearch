@@ -67,7 +67,7 @@ public final class ProfileWeight extends Weight {
 
     @Override
     public ScorerSupplier scorerSupplier(LeafReaderContext context) throws IOException {
-        Timer timer = (Timer) profile.context(context).getMetric(QueryTimingType.BUILD_SCORER.toString());
+        Timer timer =  profile.context(context).getTimer(QueryTimingType.BUILD_SCORER);
         timer.start();
         final ScorerSupplier subQueryScorerSupplier;
         try {

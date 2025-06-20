@@ -56,13 +56,13 @@ final class ProfileScorer extends Scorer {
 
     ProfileScorer(Scorer scorer, AbstractProfileBreakdown profile) {
         this.scorer = scorer;
-        scoreTimer = (Timer) profile.getMetric(QueryTimingType.SCORE.toString());
-        nextDocTimer = (Timer) profile.getMetric(QueryTimingType.NEXT_DOC.toString());
-        advanceTimer = (Timer) profile.getMetric(QueryTimingType.ADVANCE.toString());
-        matchTimer = (Timer) profile.getMetric(QueryTimingType.MATCH.toString());
-        shallowAdvanceTimer = (Timer) profile.getMetric(QueryTimingType.SHALLOW_ADVANCE.toString());
-        computeMaxScoreTimer = (Timer) profile.getMetric(QueryTimingType.COMPUTE_MAX_SCORE.toString());
-        setMinCompetitiveScoreTimer = (Timer) profile.getMetric(QueryTimingType.SET_MIN_COMPETITIVE_SCORE.toString());
+        scoreTimer =  profile.getTimer(QueryTimingType.SCORE);
+        nextDocTimer =  profile.getTimer(QueryTimingType.NEXT_DOC);
+        advanceTimer =  profile.getTimer(QueryTimingType.ADVANCE);
+        matchTimer =  profile.getTimer(QueryTimingType.MATCH);
+        shallowAdvanceTimer =  profile.getTimer(QueryTimingType.SHALLOW_ADVANCE);
+        computeMaxScoreTimer =  profile.getTimer(QueryTimingType.COMPUTE_MAX_SCORE);
+        setMinCompetitiveScoreTimer =  profile.getTimer(QueryTimingType.SET_MIN_COMPETITIVE_SCORE);
     }
 
     @Override

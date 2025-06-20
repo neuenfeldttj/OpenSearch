@@ -52,6 +52,12 @@ public abstract class AbstractProfileBreakdown {
         return metrics.get(name);
     }
 
+    public Timer getTimer(Enum<?> type) {
+        ProfileMetric metric = metrics.get(type.toString());
+        assert metric instanceof Timer : "Metric " + type + " is not a timer";
+        return (Timer) metric;
+    }
+
     public Map<String, ProfileMetric> getMetrics() {
         return Collections.unmodifiableMap(metrics);
     }
