@@ -36,7 +36,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.opensearch.OpenSearchException;
 import org.opensearch.action.ActionRunnable;
@@ -130,13 +129,7 @@ import org.opensearch.search.internal.SearchContext;
 import org.opensearch.search.internal.ShardSearchContextId;
 import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.lookup.SearchLookup;
-import org.opensearch.search.profile.AbstractProfiler;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
 import org.opensearch.search.profile.Profilers;
-import org.opensearch.search.profile.query.ContextualProfileBreakdown;
-import org.opensearch.search.profile.query.AbstractQueryProfiler;
-import org.opensearch.search.profile.query.InternalQueryProfileTree;
 import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.query.QueryPhase;
 import org.opensearch.search.query.QuerySearchRequest;
@@ -1570,7 +1563,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         if (source.profile()) {
             Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch());
             for(SearchPlugin.ProfilerProvider p : pluginProfilers) {
-                AbstractQueryProfiler profiler = p.getPluginProfiler(context);
+                QueryProfiler profiler = p.getPluginProfiler(context);
                 if(profiler != null) profilers.addPluginProfiler(profiler);
             }
             context.setProfilers(profilers);

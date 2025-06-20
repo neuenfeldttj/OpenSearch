@@ -11,17 +11,11 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.opensearch.OpenSearchException;
-import org.opensearch.core.ParseField;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
-import org.opensearch.search.profile.Profilers;
+import org.opensearch.search.profile.*;
 import org.opensearch.search.profile.Timer;
-import org.opensearch.search.sort.BucketedSort;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static org.opensearch.search.profile.Timer.*;
 

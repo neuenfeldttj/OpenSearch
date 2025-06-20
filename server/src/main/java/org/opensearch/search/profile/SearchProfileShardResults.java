@@ -38,7 +38,6 @@ import org.opensearch.core.common.io.stream.Writeable;
 import org.opensearch.core.xcontent.ToXContentFragment;
 import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.core.xcontent.XContentParser;
-import org.opensearch.index.similarity.ScriptedSimilarity;
 import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.profile.aggregation.AggregationProfileShardResult;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
@@ -195,15 +194,19 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
      *         shard
      */
     public static ProfileShardResult buildShardResults(Profilers profilers, ShardSearchRequest request) {
-        List<AbstractQueryProfiler> queryProfilers = profilers.getQueryProfilers();
+        List<QueryProfiler> queryProfilers = profilers.getQueryProfilers();
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
-        for (AbstractQueryProfiler queryProfiler : queryProfilers) {
-            QueryProfileShardResult result = queryProfiler.createProfileShardResult();
-            combineTrees(result.getProfileResults());
+        for (QueryProfiler queryProfiler : queryProfilers) {
+            QueryProfileShardResult result = new QueryProfileShardResult(
+                queryProfiler.getTree(),
+                queryProfiler.getRewriteTime(),
+                queryProfiler.getCollector()
+            );
+            combineTrees(result.getQueryResults());
             queryResults.add(result);
         }
-        AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
+        AggregationProfileShardResult aggResults = new AggregationProfileShardResult(aggProfiler.getTree());
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {
             networkTime.setInboundNetworkTime(request.getInboundNetworkTime());

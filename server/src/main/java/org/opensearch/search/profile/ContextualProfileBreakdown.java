@@ -6,15 +6,12 @@
  * compatible open source license.
  */
 
-package org.opensearch.search.profile.query;
+package org.opensearch.search.profile;
 
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
-import org.opensearch.search.profile.Timer;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +26,6 @@ public abstract class ContextualProfileBreakdown extends AbstractProfileBreakdow
 
     private Query query;
 
-    public abstract ContextualProfileBreakdown context(Object context);
-
     public void setQuery(Query query) {
         this.query = query;
     }
@@ -38,6 +33,13 @@ public abstract class ContextualProfileBreakdown extends AbstractProfileBreakdow
     public Query getQuery() {
         return query;
     }
+
+    /**
+     * Return (or create) contextual profile breakdown instance
+     * @param context freestyle context
+     * @return contextual profile breakdown instance
+     */
+    public abstract AbstractProfileBreakdown context(Object context);
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}
 

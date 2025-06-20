@@ -85,7 +85,7 @@ public class ProfileShardResult implements Writeable {
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         out.writeVInt(queryProfileResults.size());
-        for (AbstractProfileShardResult queryShardResult : queryProfileResults) {
+        for (QueryProfileShardResult queryShardResult : queryProfileResults) {
             queryShardResult.writeTo(out);
         }
         aggProfileShardResult.writeTo(out);

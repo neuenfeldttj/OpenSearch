@@ -33,17 +33,10 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.Metric;
-import org.opensearch.search.profile.ProfileResult;
-import org.opensearch.search.profile.Profilers;
-import org.opensearch.search.profile.Timer;
+import org.opensearch.search.profile.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class returns a list of {@link ProfileResult} that can be serialized back to the client in the non-concurrent execution.

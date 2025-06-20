@@ -10,7 +10,7 @@ package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @opensearch.api
  */
 @PublicApi(since = "3.0.0")
-public final class ConcurrentQueryProfiler extends AbstractQueryProfiler {
+public final class ConcurrentQueryProfiler extends QueryProfiler {
 
     private final Map<Long, ConcurrentQueryProfileTree> threadToProfileTree;
     // The LinkedList does not need to be thread safe, as the map associates thread IDs with LinkedList, and only

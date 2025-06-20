@@ -50,10 +50,10 @@ import java.util.*;
 public final class Profilers {
 
     private final ContextIndexSearcher searcher;
-    private final List<AbstractQueryProfiler> queryProfilers;
+    private final List<QueryProfiler> queryProfilers;
     private final AggregationProfiler aggProfiler;
     private final boolean isConcurrentSegmentSearchEnabled;
-    private final List<AbstractQueryProfiler> pluginProfilers;
+    private final List<QueryProfiler> pluginProfilers;
 
     public static Map<Query, Set<ContextualProfileBreakdown>> queriesToBreakdowns = new HashMap<>();
 
@@ -69,30 +69,30 @@ public final class Profilers {
     }
 
     /** Switch to a new profile. */
-    public AbstractQueryProfiler addQueryProfiler() {
-        AbstractQueryProfiler profiler = isConcurrentSegmentSearchEnabled
+    public QueryProfiler addQueryProfiler() {
+        QueryProfiler profiler = isConcurrentSegmentSearchEnabled
             ? new ConcurrentQueryProfiler(QueryProfileBreakdown.class)
-            : new QueryProfiler(QueryProfileBreakdown.class);
+            : new QueryProfiler(new InternalQueryProfileTree(QueryProfileBreakdown.class));
         searcher.setProfiler(profiler);
         queryProfilers.add(profiler);
         return profiler;
     }
 
-    public void addPluginProfiler(AbstractQueryProfiler pluginProfiler) {
+    public void addPluginProfiler(QueryProfiler pluginProfiler) {
         pluginProfilers.add(pluginProfiler);
     }
 
-    public List<AbstractQueryProfiler> getPluginProfilers() {
+    public List<QueryProfiler> getPluginProfilers() {
         return Collections.unmodifiableList(pluginProfilers);
     }
 
     /** Get the current profiler. */
-    public AbstractQueryProfiler getCurrentQueryProfiler() {
+    public QueryProfiler getCurrentQueryProfiler() {
         return queryProfilers.getLast();
     }
 
     /** Return the list of all created {@link QueryProfiler}s so far. */
-    public List<AbstractQueryProfiler> getQueryProfilers() {
+    public List<QueryProfiler> getQueryProfilers() {
         return Collections.unmodifiableList(queryProfilers);
     }
 

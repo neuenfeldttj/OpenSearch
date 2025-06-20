@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @opensearch.internal
  */
-public abstract class AbstractProfiler<PB extends AbstractProfileBreakdown, E, SR extends AbstractProfileShardResult> {
+public abstract class AbstractProfiler<PB extends AbstractProfileBreakdown, E> {
 
     protected final AbstractInternalProfileTree<PB, E> profileTree;
 
@@ -68,10 +68,5 @@ public abstract class AbstractProfiler<PB extends AbstractProfileBreakdown, E, S
     public List<ProfileResult> getTree() {
         return profileTree.getTree();
     }
-
-    /**
-     * @return a new instance of a {@link AbstractProfileShardResult}
-     */
-    public abstract SR createProfileShardResult();
 
 }

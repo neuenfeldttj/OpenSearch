@@ -13,7 +13,6 @@ import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
 import org.opensearch.search.profile.*;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

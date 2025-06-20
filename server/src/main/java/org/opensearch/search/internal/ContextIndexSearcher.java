@@ -73,7 +73,7 @@ import org.opensearch.search.DocValueFormat;
 import org.opensearch.search.SearchService;
 import org.opensearch.search.approximate.ApproximateScoreQuery;
 import org.opensearch.search.dfs.AggregatedDfs;
-import org.opensearch.search.profile.AbstractProfiler;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
 import org.opensearch.search.profile.Timer;
 import org.opensearch.search.profile.query.*;
 import org.opensearch.search.query.QueryPhase;
@@ -107,11 +107,11 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
     private static final int CHECK_CANCELLED_SCORER_INTERVAL = 1 << 11;
 
     private AggregatedDfs aggregatedDfs;
-    private AbstractQueryProfiler profiler;
+    private QueryProfiler profiler;
     private MutableQueryTimeout cancellable;
     private SearchContext searchContext;
 
-    private List<AbstractQueryProfiler> pluginProfilers;
+    private List<QueryProfiler> pluginProfilers;
 
     public ContextIndexSearcher(
         IndexReader reader,
@@ -153,11 +153,11 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         this.pluginProfilers = new ArrayList<>();
     }
 
-    public void setProfiler(AbstractQueryProfiler profiler) {
+    public void setProfiler(QueryProfiler profiler) {
         this.profiler = profiler;
     }
 
-    public void setPluginProfilers(List<AbstractQueryProfiler> pluginProfilers) {
+    public void setPluginProfilers(List<QueryProfiler> pluginProfilers) {
         this.pluginProfilers = pluginProfilers;
     }
 
@@ -221,7 +221,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // tree
             ContextualProfileBreakdown profile = profiler.getQueryBreakdown(query);
             List<ContextualProfileBreakdown> pluginBreakdowns = new ArrayList<>();
-            for(AbstractQueryProfiler pluginProfiler : pluginProfilers) {
+            for(QueryProfiler pluginProfiler : pluginProfilers) {
                 pluginBreakdowns.add(pluginProfiler.getQueryBreakdown(query));
             }
             Timer timer = (Timer) profile.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
@@ -233,7 +233,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
                 timer.stop();
                 profiler.pollLastElement();
             }
-            for(AbstractQueryProfiler pluginProfiler : pluginProfilers) {
+            for(QueryProfiler pluginProfiler : pluginProfilers) {
                 pluginProfiler.pollLastElement();
             }
             return new ProfileWeight(query, weight, profile, pluginBreakdowns);
