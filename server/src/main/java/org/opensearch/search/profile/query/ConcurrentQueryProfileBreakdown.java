@@ -49,7 +49,7 @@ public final class ConcurrentQueryProfileBreakdown extends ContextualProfileBrea
     private Set<String> nonTimingMetrics;
 
     public ConcurrentQueryProfileBreakdown(Class<? extends ContextualProfileBreakdown> breakdownClass) {
-        Map<String, Metric> metrics = new HashMap<>();
+        Map<String, ProfileMetric> metrics = new HashMap<>();
         for(QueryTimingType type : QueryTimingType.values()) {
             metrics.put(type.toString(), new Timer(type.toString()));
         }
@@ -451,8 +451,8 @@ public final class ConcurrentQueryProfileBreakdown extends ContextualProfileBrea
         Set<String> metrics = new HashSet<>();
         for(LeafReaderContext sliceContext : sliceContexts) {
             if(!contexts.containsKey(sliceContext)) continue;
-            Map<String, Metric> breakdownMetrics = contexts.get(sliceContext).getMetrics();
-            for(Map.Entry<String, Metric> entry : breakdownMetrics.entrySet()) {
+            Map<String, ProfileMetric> breakdownMetrics = contexts.get(sliceContext).getMetrics();
+            for(Map.Entry<String, ProfileMetric> entry : breakdownMetrics.entrySet()) {
                 if(timing && entry.getValue().getClass().equals(Timer.class)) {
                     metrics.add(entry.getKey());
                 }

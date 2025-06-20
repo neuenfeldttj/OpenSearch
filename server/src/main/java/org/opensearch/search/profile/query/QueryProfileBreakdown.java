@@ -47,7 +47,7 @@ import java.util.*;
 public final class QueryProfileBreakdown extends ContextualProfileBreakdown {
 
     public QueryProfileBreakdown() {
-        Map<String, Metric> metrics = new HashMap<>();
+        Map<String, ProfileMetric> metrics = new HashMap<>();
         for(QueryTimingType type : QueryTimingType.values()) {
             metrics.put(type.toString(), new Timer(type.toString()));
         }

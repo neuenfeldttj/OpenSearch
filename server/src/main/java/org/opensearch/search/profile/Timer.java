@@ -54,7 +54,7 @@ import java.util.Map;
  *  @opensearch.internal
  */
 @PublicApi(since="3.0.0")
-public class Timer extends Metric {
+public class Timer extends ProfileMetric {
     public static final String TIMING_TYPE_COUNT_SUFFIX = "_count";
     public static final String TIMING_TYPE_START_TIME_SUFFIX = "_start_time";
 

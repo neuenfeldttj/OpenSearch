@@ -32,9 +32,6 @@
 
 package org.opensearch.search.profile;
 
-import org.apache.lucene.index.MergeTrigger;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.HashMap;
 
@@ -49,17 +46,17 @@ import static java.util.Collections.emptyMap;
  */
 public abstract class AbstractProfileBreakdown {
 
-    private final Map<String, Metric> metrics = new HashMap<>();
+    private final Map<String, ProfileMetric> metrics = new HashMap<>();
 
-    public Metric getMetric(String name) {
+    public ProfileMetric getMetric(String name) {
         return metrics.get(name);
     }
 
-    public Map<String, Metric> getMetrics() {
+    public Map<String, ProfileMetric> getMetrics() {
         return Collections.unmodifiableMap(metrics);
     }
 
-    public void setMetrics(Map<String, Metric> metrics) {
+    public void setMetrics(Map<String, ProfileMetric> metrics) {
         this.metrics.putAll(metrics);
     }
 
@@ -68,7 +65,7 @@ public abstract class AbstractProfileBreakdown {
      */
     public Map<String, Long> toBreakdownMap() {
         Map<String, Long> map = new TreeMap<>();
-        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+        for(Map.Entry<String, ProfileMetric> entry : metrics.entrySet()) {
             map.putAll(entry.getValue().toBreakdownMap());
         }
         return map;
@@ -76,7 +73,7 @@ public abstract class AbstractProfileBreakdown {
 
     public long toNodeTime() {
         long total = 0;
-        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+        for(Map.Entry<String, ProfileMetric> entry : metrics.entrySet()) {
             if(entry.getValue() instanceof Timer) {
                 total += ((Timer) entry.getValue()).getApproximateTiming();
             }
