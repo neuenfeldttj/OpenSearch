@@ -86,8 +86,10 @@ import org.opensearch.search.sort.MinAndMax;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -114,6 +116,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
     private SearchContext searchContext;
 
     private List<QueryProfiler> pluginProfilers;
+    private final Map<QueryProfiler, List<ContextualProfileBreakdown>> pluginBreakdowns;
 
     public ContextIndexSearcher(
         IndexReader reader,
@@ -153,6 +156,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
         this.cancellable = cancellable;
         this.searchContext = searchContext;
         this.pluginProfilers = new ArrayList<>();
+        this.pluginBreakdowns = new HashMap<>();
     }
 
     public void setProfiler(QueryProfiler profiler) {
@@ -161,6 +165,11 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
 
     public void setPluginProfilers(List<QueryProfiler> pluginProfilers) {
         this.pluginProfilers = pluginProfilers;
+    }
+
+    public ContextualProfileBreakdown getPluginBreakdown(QueryProfiler profiler) {
+        assert pluginBreakdowns.containsKey(profiler);
+        return pluginBreakdowns.get(profiler).getLast();
     }
 
 
@@ -222,9 +231,11 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // each invocation so that it can build an internal representation of the query
             // tree
             ContextualProfileBreakdown profile = profiler.getQueryBreakdown(query);
-            List<ContextualProfileBreakdown> pluginBreakdowns = new ArrayList<>();
+            List<ContextualProfileBreakdown> pluginProfiles = new ArrayList<>();
             for(QueryProfiler pluginProfiler : pluginProfilers) {
-                pluginBreakdowns.add(pluginProfiler.getQueryBreakdown(query));
+                ContextualProfileBreakdown pluginProfile = pluginProfiler.getQueryBreakdown(query);
+                pluginProfiles.add(pluginProfile);
+                pluginBreakdowns.computeIfAbsent(pluginProfiler, p -> new ArrayList<>()).add(pluginProfile);
             }
             Timer timer =  profile.getTimer(QueryTimingType.CREATE_WEIGHT);
             timer.start();
@@ -238,7 +249,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             for(QueryProfiler pluginProfiler : pluginProfilers) {
                 pluginProfiler.pollLastElement();
             }
-            return new ProfileWeight(query, weight, profile, pluginBreakdowns);
+            return new ProfileWeight(query, weight, profile, pluginProfiles);
         } else {
             return super.createWeight(query, scoreMode, boost);
         }

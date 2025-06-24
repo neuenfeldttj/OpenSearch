@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@link AbstractProfileBreakdown} for query timings with contexts.
+ * Provide contextual profile breakdowns which are associated with freestyle context. Used when concurrent
+ * search over segments is activated and each collector needs own non-shareable profile breakdown instance.
  *
  * @opensearch.internal
  */

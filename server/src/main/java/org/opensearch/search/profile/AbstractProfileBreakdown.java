@@ -32,6 +32,8 @@
 
 package org.opensearch.search.profile;
 
+import org.opensearch.common.annotation.PublicApi;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,7 @@ import static java.util.Collections.emptyMap;
  *
  * @opensearch.internal
  */
+@PublicApi(since = "3.0.0")
 public abstract class AbstractProfileBreakdown {
 
     private final Map<String, ProfileMetric> metrics = new HashMap<>();
