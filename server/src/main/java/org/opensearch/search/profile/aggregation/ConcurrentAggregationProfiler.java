@@ -63,8 +63,8 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
         List<ProfileResult> children = new LinkedList<>();
 
         for (ProfileResult profileResult : profileResultsAcrossSlices) {
-            long profileNodeTime = profileResult.getBreakdown().get(AbstractProfileBreakdown.NODE_TIME_RAW);
-            long sliceStartTime = profileResult.getBreakdown().get(START_TIME_KEY);
+            long profileNodeTime = profileResult.getTimeBreakdown().get(AbstractProfileBreakdown.NODE_TIME_RAW);
+            long sliceStartTime = profileResult.getTimeBreakdown().get(START_TIME_KEY);
 
             // Profiled total time
             maxSliceNodeEndTime = Math.max(maxSliceNodeEndTime, sliceStartTime + profileNodeTime);
@@ -83,9 +83,9 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
             // Profiled breakdown total time
             for (AggregationTimingType timingType : AggregationTimingType.values()) {
                 String breakdownTimingType = timingType.toString();
-                Long startTime = profileResult.getBreakdown()
+                Long startTime = profileResult.getTimeBreakdown()
                     .get(breakdownTimingType + Timer.TIMING_TYPE_START_TIME_SUFFIX);
-                Long endTime = startTime + profileResult.getBreakdown().get(breakdownTimingType);
+                Long endTime = startTime + profileResult.getTimeBreakdown().get(breakdownTimingType);
                 minSliceStartTimeMap.put(
                     breakdownTimingType,
                     Math.min(minSliceStartTimeMap.getOrDefault(breakdownTimingType, Long.MAX_VALUE), startTime)
@@ -107,7 +107,7 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
                 String breakdownTypeCount = breakdownType + Timer.TIMING_TYPE_COUNT_SUFFIX;
                 breakdown.put(
                     breakdownTypeCount,
-                    breakdown.getOrDefault(breakdownTypeCount, 0L) + profileResult.getBreakdown().get(breakdownTypeCount)
+                    breakdown.getOrDefault(breakdownTypeCount, 0L) + profileResult.getTimeBreakdown().get(breakdownTypeCount)
                 );
             }
 
@@ -172,13 +172,13 @@ public class ConcurrentAggregationProfiler extends AggregationProfiler {
         String avgBreakdownType = AVG_PREFIX + breakdownType;
         statsMap.put(
             maxBreakdownType,
-            Math.max(statsMap.getOrDefault(maxBreakdownType, Long.MIN_VALUE), result.getBreakdown().get(breakdownType))
+            Math.max(statsMap.getOrDefault(maxBreakdownType, Long.MIN_VALUE), result.getTimeBreakdown().get(breakdownType))
         );
         statsMap.put(
             minBreakdownType,
-            Math.min(statsMap.getOrDefault(minBreakdownType, Long.MAX_VALUE), result.getBreakdown().get(breakdownType))
+            Math.min(statsMap.getOrDefault(minBreakdownType, Long.MAX_VALUE), result.getTimeBreakdown().get(breakdownType))
         );
-        statsMap.put(avgBreakdownType, statsMap.getOrDefault(avgBreakdownType, 0L) + result.getBreakdown().get(breakdownType));
+        statsMap.put(avgBreakdownType, statsMap.getOrDefault(avgBreakdownType, 0L) + result.getTimeBreakdown().get(breakdownType));
     }
 
     /**

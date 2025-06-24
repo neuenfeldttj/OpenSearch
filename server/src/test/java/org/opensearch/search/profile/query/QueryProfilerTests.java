@@ -174,7 +174,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
         List<ProfileResult> results = profiler.getTree();
         assertEquals(1, results.size());
         ProfileResult profileResult = results.get(0);
-        Map<String, Long> breakdown = profileResult.getBreakdown();
+        Map<String, Long> breakdown = profileResult.getTimeBreakdown();
         assertThat(breakdown.get(QueryTimingType.CREATE_WEIGHT.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.BUILD_SCORER.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.NEXT_DOC.toString()), greaterThan(0L));
@@ -243,7 +243,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
         List<ProfileResult> results = profiler.getTree();
         assertEquals(1, results.size());
         ProfileResult profileResult = results.get(0);
-        Map<String, Long> breakdown = profileResult.getBreakdown();
+        Map<String, Long> breakdown = profileResult.getTimeBreakdown();
         assertThat(breakdown.get(QueryTimingType.CREATE_WEIGHT.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.BUILD_SCORER.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.NEXT_DOC.toString()), greaterThan(0L));
@@ -312,7 +312,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
         List<ProfileResult> results = profiler.getTree();
         assertEquals(1, results.size());
         ProfileResult result = results.get(0);
-        assertEquals(0, (long) result.getBreakdown().get("build_scorer_count"));
+        assertEquals(0, (long) result.getTimeBreakdown().get("build_scorer_count"));
 
         long rewriteTime = profiler.getRewriteTime();
         assertThat(rewriteTime, greaterThan(0L));
@@ -328,7 +328,7 @@ public class QueryProfilerTests extends OpenSearchTestCase {
         List<ProfileResult> results = profiler.getTree();
         assertEquals(1, results.size());
         ProfileResult profileResult = results.get(0);
-        Map<String, Long> breakdown = profileResult.getBreakdown();
+        Map<String, Long> breakdown = profileResult.getTimeBreakdown();
         assertThat(breakdown.get(QueryTimingType.CREATE_WEIGHT.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.BUILD_SCORER.toString()), greaterThan(0L));
         assertThat(breakdown.get(QueryTimingType.NEXT_DOC.toString()), greaterThan(0L));
