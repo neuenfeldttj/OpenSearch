@@ -30,9 +30,13 @@ import static org.opensearch.search.profile.Timer.TIMING_TYPE_START_TIME_SUFFIX;
 
 
 /**
- * A {@link AbstractProfileBreakdown} for concurrent query timings.
+ * A record of timings for the various operations that may happen during query execution.
+ * A node's time may be composed of several internal attributes (rewriting, weighting,
+ * scoring, etc). The class supports profiling the concurrent search over segments.
+ *
+ * @opensearch.internal
  */
-public class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown {
+public final class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown {
     static final String SLICE_END_TIME_SUFFIX = "_slice_end_time";
     static final String SLICE_START_TIME_SUFFIX = "_slice_start_time";
     static final String MAX_PREFIX = "max_";
@@ -360,7 +364,8 @@ public class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown 
                 );
                 queryTimingTypeCount += sliceBreakdownTypeCount;
             }
-            if (queryTimingTypeStartTime == Long.MAX_VALUE || queryTimingTypeEndTime == Long.MIN_VALUE) {
+
+            if (queryTimingTypeCount > 0L && (queryTimingTypeStartTime == Long.MAX_VALUE || queryTimingTypeEndTime == Long.MIN_VALUE)) {
                 throw new OpenSearchException(
                     "Unexpected timing type ["
                         + metric
@@ -371,7 +376,7 @@ public class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown 
                         + "] computed across slices for profile results"
                 );
             }
-            queryBreakdownMap.put(timingTypeTimeKey, queryTimingTypeEndTime - queryTimingTypeStartTime);
+            queryBreakdownMap.put(timingTypeTimeKey, (queryTimingTypeCount > 0L) ? queryTimingTypeEndTime - queryTimingTypeStartTime : 0L);
             queryBreakdownMap.put(timingTypeCountKey, queryTimingTypeCount);
             queryBreakdownMap.compute(avgBreakdownTypeTime, (key, value) -> (value == null) ? 0L : value / sliceLevelBreakdowns.size());
             queryBreakdownMap.compute(avgBreakdownTypeCount, (key, value) -> (value == null) ? 0L : value / sliceLevelBreakdowns.size());
@@ -477,5 +482,4 @@ public class ConcurrentQueryProfileBreakdown extends ContextualProfileBreakdown 
     long getAvgSliceNodeTime() {
         return avgSliceNodeTime;
     }
-
 }
