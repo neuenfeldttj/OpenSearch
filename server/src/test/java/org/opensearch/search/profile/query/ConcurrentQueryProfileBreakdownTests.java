@@ -47,7 +47,7 @@ public class ConcurrentQueryProfileBreakdownTests extends OpenSearchTestCase {
     @Before
     public void setup() {
         testQueryProfileBreakdown = new ConcurrentQueryProfileBreakdown(null);
-        createWeightTimer = (Timer) testQueryProfileBreakdown.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
+        createWeightTimer =  testQueryProfileBreakdown.getTimer(QueryTimingType.CREATE_WEIGHT);
         try {
             createWeightTimer.start();
             Thread.sleep(10);

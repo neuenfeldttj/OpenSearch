@@ -224,7 +224,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            Timer timer = (Timer) profile.getMetric(QueryTimingType.CREATE_WEIGHT.toString());
+            Timer timer =  profile.getTimer(QueryTimingType.CREATE_WEIGHT);
             timer.start();
             final Weight weight;
             try {
