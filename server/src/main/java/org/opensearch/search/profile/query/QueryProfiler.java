@@ -35,7 +35,7 @@ package org.opensearch.search.profile.query;
 import org.apache.lucene.search.Query;
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.profile.AbstractProfiler;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
 
 import java.util.Objects;
 
@@ -53,7 +53,7 @@ import java.util.Objects;
  * @opensearch.api
  */
 @PublicApi(since = "1.0.0")
-public class QueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdown, Query, QueryProfileShardResult> {
+public class QueryProfiler extends AbstractProfiler<ContextualProfileBreakdown, Query> {
 
     /**
      * The root Collector used in the search
@@ -104,12 +104,8 @@ public class QueryProfiler extends AbstractProfiler<AbstractQueryProfileBreakdow
         return collector.getCollectorTree();
     }
 
-    public AbstractQueryProfileBreakdown getTopBreakdown() {
+    public ContextualProfileBreakdown getTopBreakdown() {
         return profileTree.getStackTop();
     }
 
-    @Override
-    public QueryProfileShardResult createProfileShardResult() {
-        return new QueryProfileShardResult(getTree(), getRewriteTime() ,getCollector());
-    }
 }

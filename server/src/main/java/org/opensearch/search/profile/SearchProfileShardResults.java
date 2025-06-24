@@ -41,7 +41,6 @@ import org.opensearch.core.xcontent.XContentParser;
 import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.profile.aggregation.AggregationProfileShardResult;
 import org.opensearch.search.profile.aggregation.AggregationProfiler;
-import org.opensearch.search.profile.query.CollectorResult;
 import org.opensearch.search.profile.query.QueryProfileShardResult;
 import org.opensearch.search.profile.query.QueryProfiler;
 
@@ -199,10 +198,14 @@ public final class SearchProfileShardResults implements Writeable, ToXContentFra
         AggregationProfiler aggProfiler = profilers.getAggregationProfiler();
         List<QueryProfileShardResult> queryResults = new ArrayList<>(queryProfilers.size());
         for (QueryProfiler queryProfiler : queryProfilers) {
-            QueryProfileShardResult result = queryProfiler.createProfileShardResult();
+            QueryProfileShardResult result = new QueryProfileShardResult(
+                queryProfiler.getTree(),
+                queryProfiler.getRewriteTime(),
+                queryProfiler.getCollector()
+            );
             queryResults.add(result);
         }
-        AggregationProfileShardResult aggResults = aggProfiler.createProfileShardResult();
+        AggregationProfileShardResult aggResults = new AggregationProfileShardResult(aggProfiler.getTree());
         NetworkTime networkTime = new NetworkTime(0, 0);
         if (request != null) {
             networkTime.setInboundNetworkTime(request.getInboundNetworkTime());

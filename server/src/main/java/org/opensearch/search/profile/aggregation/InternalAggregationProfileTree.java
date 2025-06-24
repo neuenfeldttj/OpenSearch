@@ -34,7 +34,7 @@ package org.opensearch.search.profile.aggregation;
 
 import org.opensearch.search.aggregations.Aggregator;
 import org.opensearch.search.profile.AbstractInternalProfileTree;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.Timer;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class InternalAggregationProfileTree extends AbstractInternalProfileTree<
 
     @Override
     protected AggregationProfileBreakdown createProfileBreakdown(Aggregator aggregator) {
-        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
+        Map<String, Class<? extends ProfileMetric>> metrics = new HashMap<>();
         for(AggregationTimingType type : AggregationTimingType.values()) {
             metrics.put(type.toString(), Timer.class);
         }

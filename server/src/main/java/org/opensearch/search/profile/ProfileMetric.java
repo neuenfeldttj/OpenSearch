@@ -16,11 +16,11 @@ import java.util.Map;
  * A metric for profiling.
  */
 @PublicApi(since="1.0.0")
-public abstract class Metric {
+public abstract class ProfileMetric {
 
     private final String name;
 
-    public Metric(String name) {
+    public ProfileMetric(String name) {
         // TODO: add extension name to it
         this.name = name;
     }

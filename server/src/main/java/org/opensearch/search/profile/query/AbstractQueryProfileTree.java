@@ -10,6 +10,7 @@ package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
 import org.opensearch.search.profile.AbstractInternalProfileTree;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
 import org.opensearch.search.profile.ProfileResult;
 
 /**
@@ -19,7 +20,7 @@ import org.opensearch.search.profile.ProfileResult;
  *
  * @opensearch.internal
  */
-public abstract class AbstractQueryProfileTree extends AbstractInternalProfileTree<AbstractQueryProfileBreakdown, Query> {
+public abstract class AbstractQueryProfileTree extends AbstractInternalProfileTree<ContextualProfileBreakdown, Query> {
 
     /** Rewrite time */
     private long rewriteTime;
@@ -64,5 +65,5 @@ public abstract class AbstractQueryProfileTree extends AbstractInternalProfileTr
         return rewriteTime;
     }
 
-    protected abstract AbstractQueryProfileBreakdown createProfileBreakdown(Query query);
+    protected abstract ContextualProfileBreakdown createProfileBreakdown(Query query);
 }

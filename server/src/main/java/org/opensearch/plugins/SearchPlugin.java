@@ -71,7 +71,7 @@ import org.opensearch.search.fetch.subphase.highlight.Highlighter;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.query.QueryPhaseSearcher;
 import org.opensearch.search.rescore.Rescorer;
 import org.opensearch.search.rescore.RescorerBuilder;
@@ -247,7 +247,7 @@ public interface SearchPlugin {
          * Provides a profiler instance
          * @return profiler instance
          */
-        Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> getPluginMetrics();
+        Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> getPluginMetrics();
     }
 
     /**

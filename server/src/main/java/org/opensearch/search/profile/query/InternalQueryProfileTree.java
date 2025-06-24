@@ -33,7 +33,8 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
@@ -47,15 +48,15 @@ import java.util.Map;
  */
 public class InternalQueryProfileTree extends AbstractQueryProfileTree {
 
-    private final Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics;
+    private final Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> pluginMetrics;
 
-    public InternalQueryProfileTree(Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
+    public InternalQueryProfileTree(Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> pluginMetrics) {
         this.pluginMetrics = pluginMetrics;
     }
 
     @Override
-    protected AbstractQueryProfileBreakdown createProfileBreakdown(Query query) {
-        Map<String, Class<? extends Metric>> metrics = new HashMap<>();
+    protected ContextualProfileBreakdown createProfileBreakdown(Query query) {
+        Map<String, Class<? extends ProfileMetric>> metrics = new HashMap<>();
         for(QueryTimingType type : QueryTimingType.values()) {
             metrics.put(type.toString(), Timer.class);
         }

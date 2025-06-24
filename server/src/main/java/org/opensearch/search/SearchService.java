@@ -132,7 +132,7 @@ import org.opensearch.search.internal.ShardSearchRequest;
 import org.opensearch.search.lookup.SearchLookup;
 import org.opensearch.search.profile.AbstractProfiler;
 import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.Profilers;
 import org.opensearch.search.query.QueryPhase;
 import org.opensearch.search.query.QuerySearchRequest;
@@ -1564,9 +1564,9 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         }
         context.evaluateRequestShouldUseConcurrentSearch();
         if (source.profile()) {
-            Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics = new HashMap<>();
+            Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> pluginMetrics = new HashMap<>();
             for(SearchPlugin.PluginMetricsProvider p : pluginProfilers) {
-                Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> metrics = p.getPluginMetrics();
+                Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> metrics = p.getPluginMetrics();
                 pluginMetrics.putAll(metrics);
             }
             Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch(), pluginMetrics);

@@ -34,7 +34,6 @@ package org.opensearch.search.profile.aggregation;
 
 import org.opensearch.common.annotation.PublicApi;
 import org.opensearch.search.aggregations.Aggregator;
-import org.opensearch.search.profile.AbstractProfileShardResult;
 import org.opensearch.search.profile.AbstractProfiler;
 
 import java.util.HashMap;
@@ -46,7 +45,7 @@ import java.util.Map;
  * @opensearch.api
  */
 @PublicApi(since = "1.0.0")
-public class AggregationProfiler extends AbstractProfiler<AggregationProfileBreakdown, Aggregator, AggregationProfileShardResult> {
+public class AggregationProfiler extends AbstractProfiler<AggregationProfileBreakdown, Aggregator> {
 
     private final Map<Aggregator, AggregationProfileBreakdown> profileBreakdownLookup = new HashMap<>();
 
@@ -68,10 +67,5 @@ public class AggregationProfiler extends AbstractProfiler<AggregationProfileBrea
             profileBreakdownLookup.put(agg, aggregationProfileBreakdown);
         }
         return aggregationProfileBreakdown;
-    }
-
-    @Override
-    public AggregationProfileShardResult createProfileShardResult() {
-        return new AggregationProfileShardResult(getTree());
     }
 }

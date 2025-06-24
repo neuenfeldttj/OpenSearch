@@ -6,14 +6,11 @@
  * compatible open source license.
  */
 
-package org.opensearch.search.profile.query;
+package org.opensearch.search.profile;
 
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
 import org.opensearch.common.annotation.PublicApi;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
-import org.opensearch.search.profile.Timer;
 
 import java.util.List;
 import java.util.Map;
@@ -22,18 +19,18 @@ import java.util.Map;
  * A {@link AbstractProfileBreakdown} for query timings with contexts.
  */
 @PublicApi(since="3.0.0")
-public abstract class AbstractQueryProfileBreakdown extends AbstractProfileBreakdown {
+public abstract class ContextualProfileBreakdown extends AbstractProfileBreakdown {
 
     /**
      * Sole constructor.
      *
      * @param metrics
      */
-    public AbstractQueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
+    public ContextualProfileBreakdown (Map<String, Class<? extends ProfileMetric>> metrics) {
         super(metrics);
     }
 
-    public abstract AbstractQueryProfileBreakdown context(Object context);
+    public abstract ContextualProfileBreakdown context(Object context);
 
     public void associateCollectorToLeaves(Collector collector, LeafReaderContext leaf) {}
 

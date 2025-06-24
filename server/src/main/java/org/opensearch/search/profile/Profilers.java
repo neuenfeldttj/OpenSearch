@@ -60,10 +60,10 @@ public final class Profilers {
     private final List<QueryProfiler> queryProfilers;
     private final AggregationProfiler aggProfiler;
     private final boolean isConcurrentSegmentSearchEnabled;
-    private final Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics;
+    private final Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> pluginMetrics;
 
     /** Sole constructor. This {@link Profilers} instance will initially wrap one {@link QueryProfiler}. */
-    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled, Map<Class<? extends Query>, Map<String, Class<? extends Metric>>> pluginMetrics) {
+    public Profilers(ContextIndexSearcher searcher, boolean isConcurrentSegmentSearchEnabled, Map<Class<? extends Query>, Map<String, Class<? extends ProfileMetric>>> pluginMetrics) {
         this.searcher = searcher;
         this.isConcurrentSegmentSearchEnabled = isConcurrentSegmentSearchEnabled;
         this.queryProfilers = new ArrayList<>();

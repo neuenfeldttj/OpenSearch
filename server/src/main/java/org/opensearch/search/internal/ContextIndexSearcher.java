@@ -73,9 +73,8 @@ import org.opensearch.search.DocValueFormat;
 import org.opensearch.search.SearchService;
 import org.opensearch.search.approximate.ApproximateScoreQuery;
 import org.opensearch.search.dfs.AggregatedDfs;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
 import org.opensearch.search.profile.Timer;
-import org.opensearch.search.profile.query.AbstractQueryProfileBreakdown;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
 import org.opensearch.search.profile.query.ProfileWeight;
 import org.opensearch.search.profile.query.QueryProfiler;
 import org.opensearch.search.profile.query.QueryTimingType;
@@ -219,7 +218,7 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
             // createWeight() is called for each query in the tree, so we tell the queryProfiler
             // each invocation so that it can build an internal representation of the query
             // tree
-            AbstractQueryProfileBreakdown profile = null;
+            ContextualProfileBreakdown profile = null;
             try {
                 profile = profiler.getQueryBreakdown(query);
             } catch (Exception e) {

@@ -54,12 +54,12 @@ public abstract class AbstractProfileBreakdown {
 
     public static final String NODE_TIME_RAW = "time_in_nanos";
 
-    private final Map<String, Metric> metrics;
+    private final Map<String, ProfileMetric> metrics;
 
     /** Sole constructor. */
-    public AbstractProfileBreakdown(Map<String, Class<? extends Metric>> metricClasses) {
-        Map<String, Metric> map = new HashMap<>();
-        for(Map.Entry<String, Class<? extends Metric>> entry : metricClasses.entrySet()) {
+    public AbstractProfileBreakdown(Map<String, Class<? extends ProfileMetric>> metricClasses) {
+        Map<String, ProfileMetric> map = new HashMap<>();
+        for(Map.Entry<String, Class<? extends ProfileMetric>> entry : metricClasses.entrySet()) {
             try {
                 map.put(entry.getKey(), entry.getValue().getConstructor(String.class).newInstance(entry.getKey()));
             } catch (Exception e) {
@@ -69,7 +69,7 @@ public abstract class AbstractProfileBreakdown {
         this.metrics = map;
     }
 
-    public Metric getMetric(String name) {
+    public ProfileMetric getMetric(String name) {
         return metrics.get(name);
     }
 
@@ -78,7 +78,7 @@ public abstract class AbstractProfileBreakdown {
      */
     public Map<String, Long> toBreakdownMap() {
         Map<String, Long> map = new HashMap<>();
-        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+        for(Map.Entry<String, ProfileMetric> entry : metrics.entrySet()) {
             map.putAll(entry.getValue().toBreakdownMap());
         }
         return map;
@@ -86,7 +86,7 @@ public abstract class AbstractProfileBreakdown {
 
     public long toNodeTime() {
         long total = 0;
-        for(Map.Entry<String, Metric> entry : metrics.entrySet()) {
+        for(Map.Entry<String, ProfileMetric> entry : metrics.entrySet()) {
             if(entry.getValue() instanceof Timer) {
                 total += ((Timer) entry.getValue()).getApproximateTiming();
             }

@@ -9,8 +9,8 @@
 package org.opensearch.search.profile.query;
 
 import org.apache.lucene.search.Query;
-import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileMetric;
 import org.opensearch.search.profile.ProfileResult;
 import org.opensearch.search.profile.Timer;
 
@@ -35,9 +35,9 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
     // one thread will access the LinkedList at a time.
     private final Map<Long, LinkedList<Timer>> threadToRewriteTimers;
 
-    private final Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics;
+    private final Map<Class<? extends Query>,  Map<String, Class<? extends ProfileMetric>>> pluginMetrics;
 
-    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  Map<String, Class<? extends Metric>>> pluginMetrics) {
+    public ConcurrentQueryProfiler(AbstractQueryProfileTree profileTree, Map<Class<? extends Query>,  Map<String, Class<? extends ProfileMetric>>> pluginMetrics) {
         super(profileTree);
         long threadId = getCurrentThreadId();
         // We utilize LinkedHashMap to preserve the insertion order of the profiled queries
@@ -49,7 +49,7 @@ public final class ConcurrentQueryProfiler extends QueryProfiler {
     }
 
     @Override
-    public AbstractQueryProfileBreakdown getQueryBreakdown(Query query) {
+    public ContextualProfileBreakdown getQueryBreakdown(Query query) {
         ConcurrentQueryProfileTree profileTree = threadToProfileTree.computeIfAbsent(
             getCurrentThreadId(),
             k -> new ConcurrentQueryProfileTree(pluginMetrics)

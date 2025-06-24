@@ -33,20 +33,21 @@
 package org.opensearch.search.profile.query;
 
 import org.opensearch.search.profile.AbstractProfileBreakdown;
-import org.opensearch.search.profile.Metric;
+import org.opensearch.search.profile.ContextualProfileBreakdown;
+import org.opensearch.search.profile.ProfileMetric;
 import java.util.Map;
 
 /**
  * A {@link AbstractProfileBreakdown} for query timings.
  */
-public class QueryProfileBreakdown extends AbstractQueryProfileBreakdown {
+public class QueryProfileBreakdown extends ContextualProfileBreakdown {
 
-    public QueryProfileBreakdown(Map<String, Class<? extends Metric>> metrics) {
+    public QueryProfileBreakdown(Map<String, Class<? extends ProfileMetric>> metrics) {
         super(metrics);
     }
 
     @Override
-    public AbstractQueryProfileBreakdown context(Object context) {
+    public ContextualProfileBreakdown context(Object context) {
         return this;
     }
 }
