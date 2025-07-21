@@ -1391,6 +1391,24 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         context.from(source.from());
         context.size(source.size());
         Map<String, InnerHitContextBuilder> innerHitBuilders = new HashMap<>();
+        if (source.sorts() != null) {
+            try {
+                Optional<SortAndFormats> optionalSort = SortBuilder.buildSort(source.sorts(), context.getQueryShardContext());
+                optionalSort.ifPresent(context::sort);
+            } catch (IOException e) {
+                throw new SearchException(shardTarget, "failed to create sort elements", e);
+            }
+        }
+        if (source.aggregations() != null && includeAggregations) {
+            try {
+                AggregatorFactories factories = source.aggregations().build(queryShardContext, null);
+                context.aggregations(new SearchContextAggregations(factories, multiBucketConsumerService.create()));
+            } catch (IOException e) {
+                throw new AggregationInitializationException("Failed to create aggregators", e);
+            }
+        }
+        context.terminateAfter(source.terminateAfter());
+
         if (source.query() != null) {
             InnerHitContextBuilder.extractInnerHits(source.query(), innerHitBuilders);
             context.parsedQuery(queryShardContext.toQuery(source.query()));
@@ -1408,14 +1426,6 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 }
             }
         }
-        if (source.sorts() != null) {
-            try {
-                Optional<SortAndFormats> optionalSort = SortBuilder.buildSort(source.sorts(), context.getQueryShardContext());
-                optionalSort.ifPresent(context::sort);
-            } catch (IOException e) {
-                throw new SearchException(shardTarget, "failed to create sort elements", e);
-            }
-        }
         context.trackScores(source.trackScores());
         context.includeNamedQueriesScore(source.includeNamedQueriesScore());
         if (source.trackTotalHitsUpTo() != null
@@ -1431,15 +1441,6 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         }
         if (source.timeout() != null) {
             context.timeout(source.timeout());
-        }
-        context.terminateAfter(source.terminateAfter());
-        if (source.aggregations() != null && includeAggregations) {
-            try {
-                AggregatorFactories factories = source.aggregations().build(queryShardContext, null);
-                context.aggregations(new SearchContextAggregations(factories, multiBucketConsumerService.create()));
-            } catch (IOException e) {
-                throw new AggregationInitializationException("Failed to create aggregators", e);
-            }
         }
         if (source.suggest() != null) {
             try {
