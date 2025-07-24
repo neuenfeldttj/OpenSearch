@@ -1408,6 +1408,14 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
             }
         }
         context.terminateAfter(source.terminateAfter());
+        context.evaluateRequestShouldUseConcurrentSearch();
+        if (source.profile()) {
+            final Function<Query, Collection<Supplier<ProfileMetric>>> pluginProfileMetricsSupplier = (query) -> pluginProfilers.stream()
+                .flatMap(p -> p.getQueryProfileMetrics(context, query).stream())
+                .toList();
+            Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch(), pluginProfileMetricsSupplier);
+            context.setProfilers(profilers);
+        }
 
         if (source.query() != null) {
             InnerHitContextBuilder.extractInnerHits(source.query(), innerHitBuilders);
@@ -1562,14 +1570,6 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
             }
             final CollapseContext collapseContext = source.collapse().build(queryShardContext);
             context.collapse(collapseContext);
-        }
-        context.evaluateRequestShouldUseConcurrentSearch();
-        if (source.profile()) {
-            final Function<Query, Collection<Supplier<ProfileMetric>>> pluginProfileMetricsSupplier = (query) -> pluginProfilers.stream()
-                .flatMap(p -> p.getQueryProfileMetrics(context, query).stream())
-                .toList();
-            Profilers profilers = new Profilers(context.searcher(), context.shouldUseConcurrentSearch(), pluginProfileMetricsSupplier);
-            context.setProfilers(profilers);
         }
 
         if (context.getStarTreeIndexEnabled() && StarTreeQueryHelper.isStarTreeSupported(context)) {
